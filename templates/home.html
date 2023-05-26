@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
     <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Rubik:400,700'>
-    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="../static/styles.css">
+
+    <title>Home</title>
     <style>
       * {
       margin: 0;
@@ -14,50 +15,12 @@
       box-sizing: border-box;
       -webkit-font-smoothing: antialiased;
       }
-      body {
-      background: #fbf8e7;
-      font-family: 'Rubik', sans-serif;
-      }
-      h1 {
-      text-align: center;
-      font-size: 70px;
-      margin: 50px;
-      }
-      .btn {
-      display: inline-block;
-      padding: 0.5rem 1rem;
-      border-radius: 0.25rem;
-      font-weight: 600;
-      text-align: center;
-      white-space: nowrap;
-      vertical-align: middle;
-      cursor: pointer;
-      user-select: none;
-      border: 1px solid transparent;
-      }
-      .btn-login {
-      color: #fff;
-      background-color: #007bff;
-      border-color: #007bff;
-      }
-      .btn-login:hover {
-      background-color: #0069d9;
-      border-color: #0062cc;
-      }
-      .btn-register {
-      color: #fff;
-      background-color: #4e0e50;
-      border-color: #4e0e50;
-      }
-      .btn-register:hover {
-      background-color: #611363;
-      border-color: #611363;
-      }
+      
     </style>
   </head>
   <body>
     <h1>InvestMate</h1>
-    <a href="{{ url_for('login') }}" class="btn btn-login">Login Page</a>
-    <a href="{{ url_for('register') }}" class="btn btn-register">Register Page</a><br>
+    <a href="{{ url_for('login') }}" class="btn btn-login">Login </a>
+    <a href="{{ url_for('register') }}" class="btn btn-register">Register </a><br>
   </body>
 </html>
