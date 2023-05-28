@@ -8,19 +8,13 @@
     <link rel="stylesheet" href="../static/styles.css">
 
     <title>Home</title>
-    <style>
-      * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-font-smoothing: antialiased;
-      }
-      
-    </style>
   </head>
   <body>
-    <h1>InvestMate</h1>
-    <a href="{{ url_for('login') }}" class="btn btn-login">Login </a>
-    <a href="{{ url_for('register') }}" class="btn btn-register">Register </a><br>
+    <div>
+      <h1>InvestMate</h1>
+      <a href="{{ url_for('login') }}" class="btn btn-login">Login </a>
+      <a href="{{ url_for('register') }}" class="btn btn-register">Register </a>
+    </div>
+    
   </body>
 </html>

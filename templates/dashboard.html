@@ -10,7 +10,17 @@
     <title>Dashboard</title>
   </head>
   <body>
-    <h1>Hello you are logged in.</h1>
+    <h1>Welcome back! Here is your dashboard.</h1>
+    <div>
+      <form action="/submit" method ="POST">
+        <label for="Stock">Stock:</label>
+        <input type="text" id="Stock" name="Stock">
+        <label for="Stock">Quantity:</label>
+        <input type="text" id="stockQuantity" name="stockQuantity">
+        <br>
+        <button>+Add</button>
+      </form>
+    </div>
     <a href="{{url_for('logout')}}">Press here to logout</a>
   </body>
 </html>
