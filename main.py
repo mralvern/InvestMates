@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, redirect
+from flask import Flask, render_template, url_for, redirect, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 from flask_wtf import FlaskForm
@@ -7,6 +7,7 @@ from wtforms.validators import InputRequired, Length, ValidationError, Email
 from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
+stocks = ["these are my stocks"]
 bcrypt = Bcrypt(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SECRET_KEY'] = 'investmates'
@@ -81,11 +82,26 @@ def login():
     return render_template('login.html', form=form)
 
 
-@app.route('/dashboard', methods=['GET', 'POST'])
+@app.route('/dashboard', methods=['POST',"GET"])
 @login_required
 def dashboard():
-    return render_template('dashboard.html')
+    if request.method == "POST":
+        stocks.append(
+            (
+            request.form.get("Stock"),
+            request.form.get("stockQuantity")
+            )
+        )
+        return redirect(url_for('dashboard'))
+    return render_template('dashboard.html', stocks=stocks)
 
+@app.route('/submit', methods=['POST'])
+def submit():
+    if request.method == 'POST':
+        stock = request.form.get("Stock")
+        quantity = request.form.get("stockQuantity")
+        stocks.append((stock, quantity))
+    return redirect(url_for('dashboard'))
 
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
