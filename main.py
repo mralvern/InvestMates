@@ -5,6 +5,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length, ValidationError, Email
 from flask_bcrypt import Bcrypt
+from sqlalchemy.orm import relationship
 
 app = Flask(__name__)
 stocks = ["these are my stocks"]
@@ -28,6 +29,13 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(20), nullable=False, unique=True)
     email = db.Column(db.String(80), nullable=False, unique=True)
     password = db.Column(db.String(80), nullable=False)
+    stocks = relationship('Stock', backref='user', cascade='all, delete-orphan')
+
+class Stock(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
 
 class RegisterForm(FlaskForm):
@@ -85,22 +93,21 @@ def login():
 @app.route('/dashboard', methods=['POST',"GET"])
 @login_required
 def dashboard():
+    stocks = Stock.query.filter_by(user_id=current_user.id).all()
     if request.method == "POST":
-        stocks.append(
-            (
-            request.form.get("Stock"),
-            request.form.get("stockQuantity")
-            )
-        )
+        
         return redirect(url_for('dashboard'))
     return render_template('dashboard.html', stocks=stocks)
 
 @app.route('/submit', methods=['POST'])
 def submit():
     if request.method == 'POST':
-        stock = request.form.get("Stock")
-        quantity = request.form.get("stockQuantity")
-        stocks.append((stock, quantity))
+        stock_name = request.form.get("Stock")
+        stock_quantity = request.form.get("stockQuantity")
+
+        stock = Stock(name=stock_name, quantity=stock_quantity, user_id=current_user.id)
+        db.session.add(stock)
+        db.session.commit()
     return redirect(url_for('dashboard'))
 
 @app.route('/logout', methods=['GET', 'POST'])
