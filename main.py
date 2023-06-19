@@ -1,12 +1,16 @@
-from flask import Flask, render_template, url_for, redirect
+from flask import Flask, render_template, url_for, redirect, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length, ValidationError, Email
 from flask_bcrypt import Bcrypt
+from sqlalchemy.orm import relationship
+import yfinance as yf
+
 
 app = Flask(__name__)
+stocks = ["these are my stocks"]
 bcrypt = Bcrypt(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SECRET_KEY'] = 'investmates'
@@ -27,6 +31,19 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(20), nullable=False, unique=True)
     email = db.Column(db.String(80), nullable=False, unique=True)
     password = db.Column(db.String(80), nullable=False)
+    stocks = relationship('Stock', backref='user', cascade='all, delete-orphan')
+
+class Stock(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+<<<<<<< HEAD
+    purchase_price = db.Column(db.Float, nullable = False)
+    current_price = db.Column(db.Float)
+=======
+    purchase_price = db.Column(db.Float, nullable=False)
+>>>>>>> c18162b43a680286af4df7664cdb8c6c29654a73
 
 
 class RegisterForm(FlaskForm):
@@ -63,6 +80,11 @@ class LoginForm(FlaskForm):
 
     submit = SubmitField('Login')
 
+def update_stock_info(stock):
+    ticker = yf.Ticker(stock.name)
+    stock_info = ticker.info
+    stock.current_price = stock_info.get('currentPrice')
+    db.session.commit()
 
 @app.route('/')
 def home():
@@ -81,11 +103,38 @@ def login():
     return render_template('login.html', form=form)
 
 
-@app.route('/dashboard', methods=['GET', 'POST'])
+@app.route('/dashboard', methods=['POST',"GET"])
 @login_required
 def dashboard():
-    return render_template('dashboard.html')
+    stocks = Stock.query.filter_by(user_id=current_user.id).all()
+    if request.method == "POST":
+        
+        return redirect(url_for('dashboard'))
+    
+    for stock in stocks:
+        update_stock_info(stock)
+    
+    return render_template('dashboard.html', stocks=stocks)
 
+@app.route('/submit', methods=['POST'])
+def submit():
+    if request.method == 'POST':
+        stock_name = request.form.get("Stock").upper()
+        stock_quantity = request.form.get("stockQuantity")
+<<<<<<< HEAD
+        purchase_price = request.form.get("purchasePrice")
+
+        stock = Stock(name=stock_name, quantity=stock_quantity, user_id=current_user.id, 
+            purchase_price=purchase_price)
+=======
+        stock_purchasePrice = request.form.get("purchasePrice")
+
+        stock = Stock(name=stock_name, quantity=stock_quantity, purchase_price=stock_purchasePrice, user_id=current_user.id)
+>>>>>>> c18162b43a680286af4df7664cdb8c6c29654a73
+        db.session.add(stock)
+        db.session.commit()
+        update_stock_info(stock)
+    return redirect(url_for('dashboard'))
 
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required

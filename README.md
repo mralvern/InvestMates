@@ -34,7 +34,9 @@ User stories:
 
 Proposed core features:
  1. User account authentication
-As of now, InvestMate requires users to register using their email. They will also be able to key in their preferred unique username and password. Users will only be able to access the web page if they have a valid account. [insert diagram].
+As of now, InvestMate requires users to register using their email. They will also be able to key in their preferred unique username and password. Users will only be able to access the web page if they have a valid account.
+![image](https://github.com/mralvern/InvestMates/assets/100460765/9e0e27b5-187c-467b-8534-2366596a7bb5)
+
 
  2. Stock tracking
 Users would be able to view real time stock prices of any stock on any market. 
@@ -50,3 +52,8 @@ Users can easily determine their total portfolio value at a glance
 
  6. Automatic calculation of Gain/Loss on their stocks
 Users can easily determin thier Gain or Loss on each of their stocks.
+
+
+Application Use FlowChart
+![image](https://github.com/mralvern/InvestMates/assets/100460765/c7e88eae-6107-4602-a9aa-e65689d55496)
+
