@@ -36,6 +36,7 @@ class Stock(db.Model):
     name = db.Column(db.String(50), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    purchase_price = db.Column(db.Float, nullable=False)
 
 
 class RegisterForm(FlaskForm):
@@ -104,8 +105,9 @@ def submit():
     if request.method == 'POST':
         stock_name = request.form.get("Stock")
         stock_quantity = request.form.get("stockQuantity")
+        stock_purchasePrice = request.form.get("purchasePrice")
 
-        stock = Stock(name=stock_name, quantity=stock_quantity, user_id=current_user.id)
+        stock = Stock(name=stock_name, quantity=stock_quantity, purchase_price=stock_purchasePrice, user_id=current_user.id)
         db.session.add(stock)
         db.session.commit()
     return redirect(url_for('dashboard'))

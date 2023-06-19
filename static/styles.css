@@ -64,9 +64,10 @@ margin-top: 20px;
 }
 
 .btn {
-display: inline-block;
+display: block;
 padding: 0.5rem 1rem;
-border-radius: 0.25rem;
+border-radius: 5rem;
+margin: 8px 400px;
 font-weight: 600;
 text-align: center;
 white-space: nowrap;

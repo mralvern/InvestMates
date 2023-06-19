@@ -4,13 +4,16 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Rubik:400,700'>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link rel="stylesheet" href="../static/stylesDashboard.css">
+    <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Rubik:400,700'>
 
     <title>Dashboard</title>
   </head>
   <body>
-    <h1>Welcome back! Here is your dashboard.</h1>
+    <h1>Welcome back! <br>
+      Here is your dashboard.
+    </h1>
     <div>
       <form action="/submit" method ="POST">
         <label for="Stock">Stock:</label>
@@ -38,12 +41,14 @@
           <tr>
               <td>{{ stock.name }}</td>
               <td>{{ stock.quantity }}</td>
-              <td>{{ stock }}</td>
+              <td>{{ stock.purchase_price }}</td>
               <td>unknown</td>
           </tr>
         {% endfor %}
       </tbody>
   </table>
-    <a href="{{url_for('logout')}}">Press here to logout</a>
+    <a href="{{url_for('logout')}}" class="btn btn-info btn-lg">
+      <span class="glyphicon glyphicon-log-out"></span>Press here to logout
+    </a>
   </body>
 </html>
