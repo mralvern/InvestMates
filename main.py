@@ -7,8 +7,10 @@ from wtforms.validators import InputRequired, Length, ValidationError, Email
 from flask_bcrypt import Bcrypt
 from sqlalchemy.orm import relationship
 import yfinance as yf
+import pandas as pd
+import plotly.graph_objects as go
 from datetime import datetime
-
+import matplotlib.pyplot as plt
 
 app = Flask(__name__)
 stocks = ["these are my stocks"]
@@ -88,6 +90,26 @@ def get_last_close(stock_name):
     last_close = todayData['Close'][0]
     return last_close
 
+def generate_portfolio_chart(user_id):
+    stocks_chart = db.session.query(Stock.name, Stock.purchase_date).filter_by(user_id=user_id).all()
+    data = pd.DataFrame()
+
+    for stock in stocks_chart:
+        ticker = stock[0]
+        start_date = stock[1]
+        chart_data = yf.download(ticker, start=start_date)
+        data = pd.concat([data, chart_data['Close']], axis=1)
+    combined_prices = data.sum(axis=1)
+    fig = go.Figure(data=go.Scatter(x=data.index, y=combined_prices))
+
+    fig.update_layout(
+    width=900,  # Set the width of the chart
+    height=400,  # Set the height of the chart
+    margin=dict(l=10, r=10, t=10, b=10)  # Set the margin around the chart
+    )
+
+    chart_html = fig.to_html(full_html=False)
+    return chart_html
 
 @app.route('/')
 def home():
@@ -147,12 +169,15 @@ def dashboard():
         
         total_portfolio_value += total_value
         total_gain += total_value - avg_purchase_price * total_quantity
+    
+    chart_html = generate_portfolio_chart(current_user.id)
 
     return render_template('dashboard.html',
         stocks=stocks_with_data,
         total_portfolio_value='{:.2f}'.format(total_portfolio_value),
         total_day_gain='{:.2f}'.format(total_day_gain),
-        total_gain='{:.2f}'.format(total_gain)
+        total_gain='{:.2f}'.format(total_gain),
+        chart_html = chart_html
         )
 
 
@@ -160,9 +185,12 @@ def dashboard():
 def submit():
     if request.method == 'POST':
         stock_name = request.form.get("Stock").upper()
+        if not stock_name:
+            return redirect(url_for('dashboard'))
+        
         stock_quantity = int(request.form.get("stockQuantity"))
         purchase_price = request.form.get("purchasePrice")
-        purchase_date = request.form.get("purchaseDate")
+        purchase_date = datetime.strptime(request.form.get("purchaseDate"), '%Y-%m-%d').date()
 
         for share in range(stock_quantity):
             stock = Stock(name=stock_name, user_id=current_user.id, 

@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link rel="stylesheet" href="../static/stylesDashboard.css">
     <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Rubik:400,700'>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
     <title>Dashboard</title>
   </head>
@@ -14,6 +15,9 @@
     <h1>Welcome back! <br>
       Here is your dashboard.
     </h1>
+    <div id="portfolio-chart" class="chart-container">
+      {{ chart_html | safe }}
+    </div>
     <div>
       <form action="/submit" method="POST">
         <label for="Stock">Stock:</label>
@@ -23,7 +27,7 @@
         <label for="purchasePrice">Purchase Price:</label>
         <input type="number" id="purchasePrice" name="purchasePrice" required>
         <label for="purchaseDate">Purchase Date:</label>
-        <input type="date" id="purchaseDate" name="purchaseDate" required>
+        <input type="date" id="purchaseDate" name="purchaseDate" required class="center-input">
         <button type="submit">+Add</button>
       </form>
     </div>
@@ -67,6 +71,7 @@
             <td>{{ total_day_gain }}</td>
             <td class="{% if total_gain|float < 0 %}negative{% else %}positive{% endif %}">{{ total_gain }}</td>
         </tr>
+        
     <a href="{{url_for('logout')}}" class="btn btn-info btn-lg">
       <span class="glyphicon glyphicon-log-out"></span>Press here to logout
     </a>

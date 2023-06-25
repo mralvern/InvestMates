@@ -5,8 +5,8 @@ font-family: 'Rubik', sans-serif;
 
 h1 {
 text-align: center;
-font-size: 70px;
-margin: 50px;
+font-size: 60px;
+margin: 30px;
 }
 
 body {
@@ -114,4 +114,16 @@ margin:0 auto;
 
 .positive {
     color: green;
+}
+
+.chart-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px
+  }
+
+.center-input {
+  margin: 0 auto;
+  display: block;
 }
