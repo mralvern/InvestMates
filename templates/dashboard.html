@@ -22,6 +22,8 @@
         <input type="number" id="stockQuantity" name="stockQuantity" required>
         <label for="purchasePrice">Purchase Price:</label>
         <input type="number" id="purchasePrice" name="purchasePrice" required>
+        <label for="purchaseDate">Purchase Date:</label>
+        <input type="date" id="purchaseDate" name="purchaseDate" required>
         <button type="submit">+Add</button>
       </form>
     </div>
@@ -35,30 +37,38 @@
               <th>Purchase Price</th>
               <th>Current Price</th>
               <th>Total Value</th>
+              <th>Day Gain</th>
           </tr>
       </thead>
       <tbody>
-        {% for stock in stocks %}  
-          <tr>
-              <td>{{ stock.name }}</td>
-              <td>{{ stock.quantity }}</td>
-              <td>{{ stock.purchase_price }}</td>
-<<<<<<< HEAD
-              <td>{{ stock.current_price }}</td>
-=======
->>>>>>> c18162b43a680286af4df7664cdb8c6c29654a73
-              <td>unknown</td>
-          </tr>
+        {% for stock in stocks %}
+        <tr>
+            <td>{{ stock[0] }}</td>
+            <td>{{ stock[1] }}</td>
+            <td>{{ stock[2] }}</td>
+            <td>{{ stock[3] }}</td>
+            <td>{{ stock[4] }}</td>
+            <td>{{ stock[5] }}</td>
+        </tr>
         {% endfor %}
       </tbody>
-<<<<<<< HEAD
-    </table>
-    <a href="{{url_for('logout')}}">Press here to logout</a>
-=======
   </table>
+  <table class="styled-table">
+    <thead>
+        <tr>
+            <th>Total Portfolio Value</th>
+            <th>Day Gain</th>
+            <th>Total Gain</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{ total_portfolio_value }}</td>
+            <td>{{ total_day_gain }}</td>
+            <td class="{% if total_gain|float < 0 %}negative{% else %}positive{% endif %}">{{ total_gain }}</td>
+        </tr>
     <a href="{{url_for('logout')}}" class="btn btn-info btn-lg">
       <span class="glyphicon glyphicon-log-out"></span>Press here to logout
     </a>
->>>>>>> c18162b43a680286af4df7664cdb8c6c29654a73
   </body>
 </html>

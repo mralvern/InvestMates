@@ -7,6 +7,7 @@ from wtforms.validators import InputRequired, Length, ValidationError, Email
 from flask_bcrypt import Bcrypt
 from sqlalchemy.orm import relationship
 import yfinance as yf
+from datetime import datetime
 
 
 app = Flask(__name__)
@@ -36,14 +37,9 @@ class User(db.Model, UserMixin):
 class Stock(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
-    quantity = db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-<<<<<<< HEAD
     purchase_price = db.Column(db.Float, nullable = False)
-    current_price = db.Column(db.Float)
-=======
-    purchase_price = db.Column(db.Float, nullable=False)
->>>>>>> c18162b43a680286af4df7664cdb8c6c29654a73
+    purchase_date = db.Column(db.DateTime, nullable = False, default=datetime.utcnow)
 
 
 class RegisterForm(FlaskForm):
@@ -80,11 +76,18 @@ class LoginForm(FlaskForm):
 
     submit = SubmitField('Login')
 
-def update_stock_info(stock):
-    ticker = yf.Ticker(stock.name)
+def get_stock_price(stock_name):
+    ticker = yf.Ticker(stock_name)
     stock_info = ticker.info
-    stock.current_price = stock_info.get('currentPrice')
-    db.session.commit()
+    current_price = stock_info.get('currentPrice')
+    return current_price
+
+def get_last_close(stock_name):
+    ticker = yf.Ticker(stock_name)
+    todayData = ticker.history(period='1d')
+    last_close = todayData['Close'][0]
+    return last_close
+
 
 @app.route('/')
 def home():
@@ -106,34 +109,67 @@ def login():
 @app.route('/dashboard', methods=['POST',"GET"])
 @login_required
 def dashboard():
-    stocks = Stock.query.filter_by(user_id=current_user.id).all()
+    #stocks = Stock.query.filter_by(user_id=current_user.id).all()
+    stocks = db.session.query(
+        Stock.name,
+        db.func.count().label('total_quantity'),
+        db.func.avg(Stock.purchase_price).label('avg_purchase_price')
+    ).filter_by(user_id=current_user.id).group_by(Stock.name).all()
+
     if request.method == "POST":
         
         return redirect(url_for('dashboard'))
     
-    for stock in stocks:
-        update_stock_info(stock)
+    total_portfolio_value = 0
+    total_day_gain = 0
+    total_gain = 0
     
-    return render_template('dashboard.html', stocks=stocks)
+    stocks_with_data = []
+    for stock in stocks:
+        stock_name = stock[0]
+        current_price = get_stock_price(stock_name)
+        total_quantity = stock[1]
+        avg_purchase_price = stock[2]
+        total_value = total_quantity * current_price
+        last_close = get_last_close(stock_name)
+        day_gain = total_quantity * (current_price - last_close)
+        total_day_gain += day_gain
+
+        stock_data = (
+            stock_name,
+            total_quantity,
+            '{:.2f}'.format(avg_purchase_price),
+            '{:.2f}'.format(current_price),
+            '{:.2f}'.format(total_value),
+            '{:.2f}'.format(day_gain)
+        )
+        stocks_with_data.append(stock_data)
+        
+        total_portfolio_value += total_value
+        total_gain += total_value - avg_purchase_price * total_quantity
+
+    return render_template('dashboard.html',
+        stocks=stocks_with_data,
+        total_portfolio_value='{:.2f}'.format(total_portfolio_value),
+        total_day_gain='{:.2f}'.format(total_day_gain),
+        total_gain='{:.2f}'.format(total_gain)
+        )
+
 
 @app.route('/submit', methods=['POST'])
 def submit():
     if request.method == 'POST':
         stock_name = request.form.get("Stock").upper()
-        stock_quantity = request.form.get("stockQuantity")
-<<<<<<< HEAD
+        stock_quantity = int(request.form.get("stockQuantity"))
         purchase_price = request.form.get("purchasePrice")
+        purchase_date = request.form.get("purchaseDate")
 
-        stock = Stock(name=stock_name, quantity=stock_quantity, user_id=current_user.id, 
-            purchase_price=purchase_price)
-=======
-        stock_purchasePrice = request.form.get("purchasePrice")
+        for share in range(stock_quantity):
+            stock = Stock(name=stock_name, user_id=current_user.id, 
+                purchase_price=purchase_price, purchase_date=purchase_date)
+            db.session.add(stock)
+            db.session.commit()
 
-        stock = Stock(name=stock_name, quantity=stock_quantity, purchase_price=stock_purchasePrice, user_id=current_user.id)
->>>>>>> c18162b43a680286af4df7664cdb8c6c29654a73
-        db.session.add(stock)
-        db.session.commit()
-        update_stock_info(stock)
     return redirect(url_for('dashboard'))
 
 @app.route('/logout', methods=['GET', 'POST'])
