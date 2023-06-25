@@ -6,6 +6,9 @@ from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length, ValidationError, Email
 from flask_bcrypt import Bcrypt
 from sqlalchemy.orm import relationship
+import yfinance as yf
+from datetime import datetime
+
 
 app = Flask(__name__)
 stocks = ["these are my stocks"]
@@ -34,9 +37,9 @@ class User(db.Model, UserMixin):
 class Stock(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
-    quantity = db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    purchase_price = db.Column(db.Float, nullable=False)
+    purchase_price = db.Column(db.Float, nullable = False)
+    purchase_date = db.Column(db.DateTime, nullable = False, default=datetime.utcnow)
 
 
 class RegisterForm(FlaskForm):
@@ -73,6 +76,18 @@ class LoginForm(FlaskForm):
 
     submit = SubmitField('Login')
 
+def get_stock_price(stock_name):
+    ticker = yf.Ticker(stock_name)
+    stock_info = ticker.info
+    current_price = stock_info.get('currentPrice')
+    return current_price
+
+def get_last_close(stock_name):
+    ticker = yf.Ticker(stock_name)
+    todayData = ticker.history(period='1d')
+    last_close = todayData['Close'][0]
+    return last_close
+
 
 @app.route('/')
 def home():
@@ -94,22 +109,67 @@ def login():
 @app.route('/dashboard', methods=['POST',"GET"])
 @login_required
 def dashboard():
-    stocks = Stock.query.filter_by(user_id=current_user.id).all()
+    #stocks = Stock.query.filter_by(user_id=current_user.id).all()
+    stocks = db.session.query(
+        Stock.name,
+        db.func.count().label('total_quantity'),
+        db.func.avg(Stock.purchase_price).label('avg_purchase_price')
+    ).filter_by(user_id=current_user.id).group_by(Stock.name).all()
+
     if request.method == "POST":
         
         return redirect(url_for('dashboard'))
-    return render_template('dashboard.html', stocks=stocks)
+    
+    total_portfolio_value = 0
+    total_day_gain = 0
+    total_gain = 0
+    
+    stocks_with_data = []
+    for stock in stocks:
+        stock_name = stock[0]
+        current_price = get_stock_price(stock_name)
+        total_quantity = stock[1]
+        avg_purchase_price = stock[2]
+        total_value = total_quantity * current_price
+        last_close = get_last_close(stock_name)
+        day_gain = total_quantity * (current_price - last_close)
+        total_day_gain += day_gain
+
+        stock_data = (
+            stock_name,
+            total_quantity,
+            '{:.2f}'.format(avg_purchase_price),
+            '{:.2f}'.format(current_price),
+            '{:.2f}'.format(total_value),
+            '{:.2f}'.format(day_gain)
+        )
+        stocks_with_data.append(stock_data)
+        
+        total_portfolio_value += total_value
+        total_gain += total_value - avg_purchase_price * total_quantity
+
+    return render_template('dashboard.html',
+        stocks=stocks_with_data,
+        total_portfolio_value='{:.2f}'.format(total_portfolio_value),
+        total_day_gain='{:.2f}'.format(total_day_gain),
+        total_gain='{:.2f}'.format(total_gain)
+        )
+
 
 @app.route('/submit', methods=['POST'])
 def submit():
     if request.method == 'POST':
-        stock_name = request.form.get("Stock")
-        stock_quantity = request.form.get("stockQuantity")
-        stock_purchasePrice = request.form.get("purchasePrice")
+        stock_name = request.form.get("Stock").upper()
+        stock_quantity = int(request.form.get("stockQuantity"))
+        purchase_price = request.form.get("purchasePrice")
+        purchase_date = request.form.get("purchaseDate")
 
-        stock = Stock(name=stock_name, quantity=stock_quantity, purchase_price=stock_purchasePrice, user_id=current_user.id)
-        db.session.add(stock)
-        db.session.commit()
+        for share in range(stock_quantity):
+            stock = Stock(name=stock_name, user_id=current_user.id, 
+                purchase_price=purchase_price, purchase_date=purchase_date)
+            db.session.add(stock)
+            db.session.commit()
+
     return redirect(url_for('dashboard'))
 
 @app.route('/logout', methods=['GET', 'POST'])
