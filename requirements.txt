@@ -4,3 +4,9 @@ flask_sqlalchemy
 flask_login 
 flask_wtf 
 flask_bcrypt
+sqlalchemy
+wtforms
+yfinance
+pandas
+plotly
+matplotlib

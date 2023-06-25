@@ -11,6 +11,8 @@ To create a web application where users are able to store and track their stocks
 Project Scope (Expanded):
 We want to create a web application that is easy to use where users are able to access data that they have previously keyed. This data will be tied to their individual accounts and can be editted to their preference. Users of the app should have the freedom to add, remove, and modify the stocks and the quantity of those stocks in their portfolio according to their preference. This is necessary as the stock market is ever changing and the liberity to change their portfolio is a key feature for investors.
 
+The other platforms available right now only show the stocks that you have purchased through them. However, with InvestMates, stocks from every platform can be manually keyed into their account to track on a centralised platform.
+
 The application would automatically help them calculate their total asset value and their Gain/Loss on their position. At a glance, users of the app should be able to see 2 key sets of information; how their stocks are performing and their total asset value.
 
 
@@ -40,18 +42,32 @@ As of now, InvestMate requires users to register using their email. They will al
 
  2. Stock tracking
 Users would be able to view real time stock prices of any stock on any market. 
+-InvestMates will use the yahoo finance API to attain data on individual stocks.
+
 
  3. Portfolio creation
 Users would be able to create their own portfolios and add whatever stocks they want to it.
+- We will use sqlalchemy to track each users data and the stocks they hold.
+
 
  4. Portfolio sharing 
 Users would be able to take a snapshot of their portfolio and be able to share their portfolio with their peers.
 
+
  5. Automatic calculation of total assets
 Users can easily determine their total portfolio value at a glance 
+- Upon rendering of the dashboard page, InvestMates will iterate through the list of stocks the user has and retrieve the quantity and current price with the formula: stock quantity * current stock price.
+
+- Total portfolio value would be calculated by the summation of the individual stocks in the portfolio
+
 
  6. Automatic calculation of Gain/Loss on their stocks
 Users can easily determin thier Gain or Loss on each of their stocks.
+- The yfinance api will current price and the last close price. The difference in these prices will give us the day gain price: current price - current price = day gain/loss
+
+- the day gain/ loss for each ticker is then calculated with the formula: day gain * stock quantity
+
+- The total day gain/loss is calcaulated by adding the day gain/ loss of each ticker
 
 
 Application Use FlowChart
