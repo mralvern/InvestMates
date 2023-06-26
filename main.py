@@ -84,11 +84,11 @@ def get_stock_price(stock_name):
     current_price = stock_info.get('currentPrice')
     return current_price
 
-def get_last_close(stock_name):
+def get_open_price(stock_name):
     ticker = yf.Ticker(stock_name)
-    todayData = ticker.history(period='1d')
-    last_close = todayData['Close'][0]
-    return last_close
+    stock_info = ticker.info
+    open_price = stock_info.get('open')
+    return open_price
 
 def generate_portfolio_chart(user_id):
     stocks_chart = db.session.query(Stock.name, Stock.purchase_date).filter_by(user_id=user_id).all()
@@ -153,8 +153,8 @@ def dashboard():
         total_quantity = stock[1]
         avg_purchase_price = stock[2]
         total_value = total_quantity * current_price
-        last_close = get_last_close(stock_name)
-        day_gain = total_quantity * (current_price - last_close)
+        open_price = get_open_price(stock_name)
+        day_gain = total_quantity * (current_price - open_price)
         total_day_gain += day_gain
 
         stock_data = (
