@@ -40,36 +40,30 @@ User stories:
  5. As an investor, I would like to determine the performance of my stocks at a glance
 
 
-Proposed core features:
+Completed core features:
  1. User account authentication
-As of now, InvestMate requires users to register using their email. They will also be able to key in their preferred unique username and password. Users will only be able to access the web page if they have a valid account.
+As of now, InvestMate requires users to register using their email. They will also be able to key in their preferred unique username and valid password. Users will only be able to access the web page if they have a valid account.
 ![image](https://github.com/mralvern/InvestMates/assets/100460765/9e0e27b5-187c-467b-8534-2366596a7bb5)
 
 
  2. Stock tracking
 Users would be able to view real time stock prices of any stock on any market. 
--InvestMates will use the yahoo finance API to attain data on individual stocks.
-
+-InvestMates will use the yahoo finance API to attain data on individual stocks. Current prices of stocks are displayed and updated in real time.
 
  3. Portfolio creation
 Users would be able to create their own portfolios and add whatever stocks they want to it.
-- We will use sqlalchemy to track each users data and the stocks they hold.
+- We will use sqlalchemy to track each users data and the stocks they hold. Each portfolio displays the overall performance and value, providing an overview of the user's investments.
 
-
- 4. Portfolio sharing 
-Users would be able to take a snapshot of their portfolio and be able to share their portfolio with their peers.
-
-
- 5. Automatic calculation of total assets
+ 4. Automatic calculation of total assets
 Users can easily determine their total portfolio value at a glance 
-- Upon rendering of the dashboard page, InvestMates will iterate through the list of stocks the user has and retrieve the quantity and current price with the formula: stock quantity * current stock price.
+- Upon rendering of the dashboard page, InvestMates will iterate through the list of stocks the user has and retrieve the quantity and current price with the formula: stock quantity * current stock price. 
 
 - Total portfolio value would be calculated by the summation of the individual stocks in the portfolio
 
 
- 6. Automatic calculation of Gain/Loss on their stocks
-Users can easily determin thier Gain or Loss on each of their stocks.
-- The yfinance api will current price and the last close price. The difference in these prices will give us the day gain price: current price - current price = day gain/loss
+ 5. Automatic calculation of Gain/Loss on their stocks
+Users can easily determine thier Gain or Loss on each of their stocks.
+- The yfinance api will fetch current price and the open price. The difference in these prices will give us the day gain price: open price - current price = day gain/loss
 
 - the day gain/ loss for each ticker is then calculated with the formula: day gain * stock quantity
 
@@ -78,3 +72,12 @@ Users can easily determin thier Gain or Loss on each of their stocks.
 
 Application Use FlowChart
 ![image](https://github.com/mralvern/InvestMates/assets/100460765/c7e88eae-6107-4602-a9aa-e65689d55496)
+
+Features to be implemented by milestone 3:
+1. Portfolio sharing
+- Users would be able to search other user's usernames in order to view their portfolios
+
+2. Dashboard insights and styling the page
+- Add individual stock page when name is clicked on
+- Add more views using yfinance functions. Plan to add web articles, pie chart by industry, PnL graph to dashboard
+- Improve on dashboard design
