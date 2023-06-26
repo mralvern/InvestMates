@@ -5,6 +5,9 @@ InvestMates
 Application Website:
 https://investmates.onrender.com/
 
+Feature testing and bug fixes:
+https://docs.google.com/document/d/10zmWhCe5TISr3lnODhZNB2JDzhrppL2D2pE1DiUjQ4E/edit?usp=sharing
+
 Proposed Level of Achievement:
 Apollo 11
 
@@ -75,4 +78,3 @@ Users can easily determin thier Gain or Loss on each of their stocks.
 
 Application Use FlowChart
 ![image](https://github.com/mralvern/InvestMates/assets/100460765/c7e88eae-6107-4602-a9aa-e65689d55496)
-
