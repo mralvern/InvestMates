@@ -11,3 +11,4 @@ yfinance
 pandas
 plotly
 matplotlib
+flask-share

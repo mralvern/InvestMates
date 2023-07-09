@@ -12,6 +12,7 @@
     <title>Dashboard</title>
   </head>
   <body>
+    {{ share.load() }}
     <h1>Welcome back! <br>
       Here is your dashboard.
     </h1>
@@ -30,9 +31,14 @@
         <input type="date" id="purchaseDate" name="purchaseDate" required class="center-input">
         <button type="submit">+Add</button>
       </form>
+      <form action="/screenshot" method="POST">
+        <input type="text" name="url" placeholder="Enter Website URL">
+        <button type="submit">Generate Screenshot</button>
+      </form>
     </div>
-    <p>These are my stocks:</p>
-
+    <div>
+      {{ share.create(title='Share with: ') }}
+    </div>
     <table class="styled-table">
       <thead>
           <tr>
@@ -56,7 +62,8 @@
         </tr>
         {% endfor %}
       </tbody>
-  </table>
+    </table>
+
   <table class="styled-table">
     <thead>
         <tr>
