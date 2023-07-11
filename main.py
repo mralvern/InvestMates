@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import requests
 from bs4 import BeautifulSoup
 from newspaper import Article
+from flask_share import Share
 
 app = Flask(__name__)
 stocks = ["these are my stocks"]
@@ -22,6 +23,7 @@ bcrypt = Bcrypt(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SECRET_KEY'] = 'investmates'
 db = SQLAlchemy(app)
+share = Share(app)
 
 login_manager = LoginManager()
 login_manager.init_app(app)

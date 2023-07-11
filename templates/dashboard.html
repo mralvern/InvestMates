@@ -12,22 +12,10 @@
     <title>Dashboard</title>
   </head>
   <body>
-    <table class="styled-table">
-      <thead>
-          <tr>
-              <th>Total Portfolio Value</th>
-              <th>Day Gain</th>
-              <th>Total Gain</th>
-          </tr>
-      </thead>
-      <tbody>
-          <tr>
-              <td>{{ total_portfolio_value }}</td>
-              <td>{{ total_day_gain }}</td>
-              <td class="{% if total_gain|float < 0 %}negative{% else %}positive{% endif %}">{{ total_gain }}</td>
-          </tr>
-      </tbody>
-    </table>
+    {{ share.load() }}
+    <h1>Welcome back! <br>
+      Here is your dashboard.
+    </h1>
 
     <div class="chart-selection">
       <label for="chartType">Chart Type:</label>
@@ -36,6 +24,7 @@
           <option value="pnl" {% if chart_type == 'pnl' %}selected{% endif %}>PnL Percentage</option>
       </select>
     </div>
+    
     <div id="portfolio-chart" class="chart-container">
       {% if chart_type == 'portfolio' %}
           {{ chart_html | safe }}
@@ -83,6 +72,24 @@
         {% endfor %}
       </tbody>
     </table>
+    
+    <table class="styled-table">
+      <thead>
+          <tr>
+              <th>Total Portfolio Value</th>
+              <th>Day Gain</th>
+              <th>Total Gain</th>
+          </tr>
+      </thead>
+      <tbody>
+          <tr>
+              <td>{{ total_portfolio_value }}</td>
+              <td>{{ total_day_gain }}</td>
+              <td class="{% if total_gain|float < 0 %}negative{% else %}positive{% endif %}">{{ total_gain }}</td>
+          </tr>
+      </tbody>
+    </table>
+    
     <div id="popupForm" class="popup">
       <form action="/submit" method="POST" class="popup-content">
         <span id="closeButton" class="close">&times;</span>
@@ -96,6 +103,13 @@
         <input type="date" id="purchaseDate" name="purchaseDate" required class="center-input">
         <button type="submit">+Add</button>
       </form>
+      <form action="/screenshot" method="POST">
+        <input type="text" name="url" placeholder="Enter Website URL">
+        <button type="submit">Generate Screenshot</button>
+      </form>
+    </div>
+    <div>
+      {{ share.create(title='Share with: ') }}
     </div>
     <div class="scrollable-container">
       <div id="news-container">
@@ -157,6 +171,26 @@
         document.getElementById('popupForm').style.display = 'none';
       });
     </script>
+
+  <table class="styled-table">
+    <thead>
+        <tr>
+            <th>Total Portfolio Value</th>
+            <th>Day Gain</th>
+            <th>Total Gain</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{ total_portfolio_value }}</td>
+            <td>{{ total_day_gain }}</td>
+            <td class="{% if total_gain|float < 0 %}negative{% else %}positive{% endif %}">{{ total_gain }}</td>
+        </tr>
+        
+    <a href="{{url_for('logout')}}" class="btn btn-info btn-lg">
+      <span class="glyphicon glyphicon-log-out"></span>Press here to logout
+    </a>
+      
   </body>
 </html>
 
