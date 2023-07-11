@@ -12,14 +12,80 @@
     <title>Dashboard</title>
   </head>
   <body>
-    <h1>Welcome back! <br>
-      Here is your dashboard.
-    </h1>
-    <div id="portfolio-chart" class="chart-container">
-      {{ chart_html | safe }}
+    <table class="styled-table">
+      <thead>
+          <tr>
+              <th>Total Portfolio Value</th>
+              <th>Day Gain</th>
+              <th>Total Gain</th>
+          </tr>
+      </thead>
+      <tbody>
+          <tr>
+              <td>{{ total_portfolio_value }}</td>
+              <td>{{ total_day_gain }}</td>
+              <td class="{% if total_gain|float < 0 %}negative{% else %}positive{% endif %}">{{ total_gain }}</td>
+          </tr>
+      </tbody>
+    </table>
+
+    <div class="chart-selection">
+      <label for="chartType">Chart Type:</label>
+      <select id="chartType" name="chartType">
+          <option value="portfolio" {% if chart_type == 'portfolio' %}selected{% endif %}>Portfolio Value</option>
+          <option value="pnl" {% if chart_type == 'pnl' %}selected{% endif %}>PnL Percentage</option>
+      </select>
     </div>
-    <div>
-      <form action="/submit" method="POST">
+    <div id="portfolio-chart" class="chart-container">
+      {% if chart_type == 'portfolio' %}
+          {{ chart_html | safe }}
+      {% endif %}
+    </div>
+  
+    <div id="pnl-chart" class="chart-container">
+      {% if chart_type == 'pnl' %}
+          {{ chart_html | safe }}
+      {% endif %}
+    </div>
+    <script>
+      document.getElementById('chartType').addEventListener('change', function() {
+          var selectedChartType = this.value;
+          window.location.href = '/dashboard?chart_type=' + selectedChartType;
+      });
+    </script>
+
+    <div class="header-row text-center">
+      <h2 class="top-holdings-heading">Top Holdings</h2>
+      <button id="addButton" class="custom-button">Add</button>    
+    </div> 
+
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>Stock Name</th>
+          <th>Stock Quantity</th>
+          <th>Purchase Price</th>
+          <th>Current Price</th>
+          <th>Total Value</th>
+          <th>Day Gain</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for stock in stocks %}
+        <tr>
+          <td>{{ stock[0] }}</td>
+          <td>{{ stock[1] }}</td>
+          <td>{{ stock[2] }}</td>
+          <td>{{ stock[3] }}</td>
+          <td>{{ stock[4] }}</td>
+          <td>{{ stock[5] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div id="popupForm" class="popup">
+      <form action="/submit" method="POST" class="popup-content">
+        <span id="closeButton" class="close">&times;</span>
         <label for="Stock">Stock:</label>
         <input type="text" id="Stock" name="Stock" required>
         <label for="stockQuantity">Quantity:</label>
@@ -31,49 +97,66 @@
         <button type="submit">+Add</button>
       </form>
     </div>
-    <p>These are my stocks:</p>
+    <div class="scrollable-container">
+      <div id="news-container">
+        {% for article in news_articles %}
+        <a class="article-link" href="{{ article['url'] }}" target="_blank">
+          <div class="article">
+            <div class="image-container">
+              <img src="{{ article['image'] }}" alt="{{ article['title'] }}">
+            </div>
+            <div class="content-container">
+              <h2>{{ article['title'] }}</h2>
+              <div class="metadata">
+                <p class="publisher">{{ article['publisher'] }}</p>
+                <p class="time">{{ article['time'] }}</p>
+              </div>
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
 
+    <div class="header-row text-center">
+      <h2 class="top-holdings-heading">Watchlist</h2>
+      <form action="/watchlist" method="POST" class="watchlist-form">
+        <input type="text" id="stockInput" name="stockInput" placeholder="Enter stock symbol" required>
+        <button type="submit">Add</button>
+      </form>
+    </div>
     <table class="styled-table">
       <thead>
-          <tr>
-              <th>Stock Name</th>
-              <th>Stock Quantity</th>
-              <th>Purchase Price</th>
-              <th>Current Price</th>
-              <th>Total Value</th>
-              <th>Day Gain</th>
-          </tr>
+        <tr>
+          <th>Stock Symbol</th>
+          <th>Current Price</th>
+          <th>Day Gain</th>
+        </tr>
       </thead>
       <tbody>
-        {% for stock in stocks %}
+        {% for stock, price, gain in watchlist_data %}
         <tr>
-            <td>{{ stock[0] }}</td>
-            <td>{{ stock[1] }}</td>
-            <td>{{ stock[2] }}</td>
-            <td>{{ stock[3] }}</td>
-            <td>{{ stock[4] }}</td>
-            <td>{{ stock[5] }}</td>
+          <td>{{ stock }}</td>
+          <td>{{ price }}</td>
+          <td>{{ gain }}</td>
         </tr>
         {% endfor %}
       </tbody>
-  </table>
-  <table class="styled-table">
-    <thead>
-        <tr>
-            <th>Total Portfolio Value</th>
-            <th>Day Gain</th>
-            <th>Total Gain</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>{{ total_portfolio_value }}</td>
-            <td>{{ total_day_gain }}</td>
-            <td class="{% if total_gain|float < 0 %}negative{% else %}positive{% endif %}">{{ total_gain }}</td>
-        </tr>
-        
-    <a href="{{url_for('logout')}}" class="btn btn-info btn-lg">
-      <span class="glyphicon glyphicon-log-out"></span>Press here to logout
-    </a>
+    </table>
+
+    <div id="sector-chart" class="chart-container">
+      {{ sector_html | safe }}
+    </div>
+  
+    <script>
+      document.getElementById('addButton').addEventListener('click', function() {
+        document.getElementById('popupForm').style.display = 'block';
+      });
+
+      document.getElementById('closeButton').addEventListener('click', function() {
+        document.getElementById('popupForm').style.display = 'none';
+      });
+    </script>
   </body>
 </html>
+
