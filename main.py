@@ -11,6 +11,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from datetime import datetime
 import matplotlib.pyplot as plt
+from flask_share import Share
 
 app = Flask(__name__)
 stocks = ["these are my stocks"]
@@ -18,6 +19,7 @@ bcrypt = Bcrypt(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SECRET_KEY'] = 'investmates'
 db = SQLAlchemy(app)
+share = Share(app)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
