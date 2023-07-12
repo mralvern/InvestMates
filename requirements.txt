@@ -11,4 +11,5 @@ yfinance
 pandas
 plotly
 matplotlib
+newspaper3k
 flask-share
