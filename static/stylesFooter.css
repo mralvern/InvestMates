@@ -1,0 +1,19 @@
+.footer-basic {
+    padding: 40px 0;
+    background-color: #ffa947;
+    color: #4b4c4d;
+}
+
+.footer-basic .copyright {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 13px;
+    color: #ffca81;
+    margin-bottom: 0;
+}
+
+.social {
+    font-family: 'Rubik', sans-serif;
+    text-align: center;
+    font-size: 13px;
+}

@@ -1,196 +1,207 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <link rel="stylesheet" href="../static/stylesDashboard.css">
-    <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Rubik:400,700'>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
-    <title>Dashboard</title>
-  </head>
-  <body>
-    {{ share.load() }}
-    <h1>Welcome back! <br>
-      Here is your dashboard.
-    </h1>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Rubik:400,700'>
+  <link rel="stylesheet" href="../static/stylesDashboard.css">
+  <link rel="stylesheet" href="../static/stylesFooter.css">
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
-    <div class="chart-selection">
-      <label for="chartType">Chart Type:</label>
-      <select id="chartType" name="chartType">
-          <option value="portfolio" {% if chart_type == 'portfolio' %}selected{% endif %}>Portfolio Value</option>
-          <option value="pnl" {% if chart_type == 'pnl' %}selected{% endif %}>PnL Percentage</option>
-      </select>
-    </div>
-    
-    <div id="portfolio-chart" class="chart-container">
-      {% if chart_type == 'portfolio' %}
-          {{ chart_html | safe }}
-      {% endif %}
-    </div>
-  
-    <div id="pnl-chart" class="chart-container">
-      {% if chart_type == 'pnl' %}
-          {{ chart_html | safe }}
-      {% endif %}
-    </div>
-    <script>
-      document.getElementById('chartType').addEventListener('change', function() {
-          var selectedChartType = this.value;
-          window.location.href = '/dashboard?chart_type=' + selectedChartType;
-      });
-    </script>
+  <title>Dashboard</title>
+</head>
 
-    <div class="header-row text-center">
-      <h2 class="top-holdings-heading">Top Holdings</h2>
-      <button id="addButton" class="custom-button">Add</button>    
-    </div> 
+<body>
+  {{ share.load() }}
+  <h1>Here is your dashboard.</h1>
 
-    <table class="styled-table">
-      <thead>
-        <tr>
-          <th>Stock Name</th>
-          <th>Stock Quantity</th>
-          <th>Purchase Price</th>
-          <th>Current Price</th>
-          <th>Total Value</th>
-          <th>Day Gain</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for stock in stocks %}
-        <tr>
-          <td>{{ stock[0] }}</td>
-          <td>{{ stock[1] }}</td>
-          <td>{{ stock[2] }}</td>
-          <td>{{ stock[3] }}</td>
-          <td>{{ stock[4] }}</td>
-          <td>{{ stock[5] }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    
-    <table class="styled-table">
-      <thead>
-          <tr>
-              <th>Total Portfolio Value</th>
-              <th>Day Gain</th>
-              <th>Total Gain</th>
-          </tr>
-      </thead>
-      <tbody>
-          <tr>
-              <td>{{ total_portfolio_value }}</td>
-              <td>{{ total_day_gain }}</td>
-              <td class="{% if total_gain|float < 0 %}negative{% else %}positive{% endif %}">{{ total_gain }}</td>
-          </tr>
-      </tbody>
-    </table>
-    
-    <div id="popupForm" class="popup">
-      <form action="/submit" method="POST" class="popup-content">
-        <span id="closeButton" class="close">&times;</span>
-        <label for="Stock">Stock:</label>
-        <input type="text" id="Stock" name="Stock" required>
-        <label for="stockQuantity">Quantity:</label>
-        <input type="number" id="stockQuantity" name="stockQuantity" required>
-        <label for="purchasePrice">Purchase Price:</label>
-        <input type="number" id="purchasePrice" name="purchasePrice" required>
-        <label for="purchaseDate">Purchase Date:</label>
-        <input type="date" id="purchaseDate" name="purchaseDate" required class="center-input">
-        <button type="submit">+Add</button>
-      </form>
-      <form action="/screenshot" method="POST">
-        <input type="text" name="url" placeholder="Enter Website URL">
-        <button type="submit">Generate Screenshot</button>
-      </form>
-    </div>
-    <div>
-      {{ share.create(title='Share with: ') }}
-    </div>
-    <div class="scrollable-container">
-      <div id="news-container">
-        {% for article in news_articles %}
-        <a class="article-link" href="{{ article['url'] }}" target="_blank">
-          <div class="article">
-            <div class="image-container">
-              <img src="{{ article['image'] }}" alt="{{ article['title'] }}">
-            </div>
-            <div class="content-container">
-              <h2>{{ article['title'] }}</h2>
-              <div class="metadata">
-                <p class="publisher">{{ article['publisher'] }}</p>
-                <p class="time">{{ article['time'] }}</p>
-              </div>
-            </div>
-          </div>
-        </a>
-        {% endfor %}
-      </div>
-    </div>
+  <div class="chart-selection">
+    <label for="chartType">Chart Type:</label>
+    <select id="chartType" name="chartType">
+      <option value="portfolio" {% if chart_type == 'portfolio' %}selected{% endif %}>Portfolio Value</option>
+      <option value="pnl" {% if chart_type == 'pnl' %}selected{% endif %}>PnL Percentage</option>
+    </select>
+  </div>
 
-    <div class="header-row text-center">
-      <h2 class="top-holdings-heading">Watchlist</h2>
-      <form action="/watchlist" method="POST" class="watchlist-form">
-        <input type="text" id="stockInput" name="stockInput" placeholder="Enter stock symbol" required>
-        <button type="submit">Add</button>
-      </form>
-    </div>
-    <table class="styled-table">
-      <thead>
-        <tr>
-          <th>Stock Symbol</th>
-          <th>Current Price</th>
-          <th>Day Gain</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for stock, price, gain in watchlist_data %}
-        <tr>
-          <td>{{ stock }}</td>
-          <td>{{ price }}</td>
-          <td>{{ gain }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  <div id="portfolio-chart" class="chart-container">
+    {% if chart_type == 'portfolio' %}
+    {{ chart_html | safe }}
+    {% endif %}
+  </div>
 
-    <div id="sector-chart" class="chart-container">
-      {{ sector_html | safe }}
-    </div>
-  
-    <script>
-      document.getElementById('addButton').addEventListener('click', function() {
-        document.getElementById('popupForm').style.display = 'block';
-      });
+  <div id="pnl-chart" class="chart-container">
+    {% if chart_type == 'pnl' %}
+    {{ chart_html | safe }}
+    {% endif %}
+  </div>
 
-      document.getElementById('closeButton').addEventListener('click', function() {
-        document.getElementById('popupForm').style.display = 'none';
-      });
-    </script>
+  <script>
+    document.getElementById('chartType').addEventListener('change', function () {
+      var selectedChartType = this.value;
+      window.location.href = '/dashboard?chart_type=' + selectedChartType;
+    });
+  </script>
+
+  <div class="header-row text-center">
+    <h2 class="top-holdings-heading">Top Holdings</h2>
+    <button id="addButton" class="custom-button">Add</button>
+  </div>
 
   <table class="styled-table">
     <thead>
-        <tr>
-            <th>Total Portfolio Value</th>
-            <th>Day Gain</th>
-            <th>Total Gain</th>
-        </tr>
+      <tr>
+        <th>Stock Name</th>
+        <th>Stock Quantity</th>
+        <th>Purchase Price</th>
+        <th>Current Price</th>
+        <th>Total Value</th>
+        <th>Day Gain</th>
+      </tr>
     </thead>
     <tbody>
-        <tr>
-            <td>{{ total_portfolio_value }}</td>
-            <td>{{ total_day_gain }}</td>
-            <td class="{% if total_gain|float < 0 %}negative{% else %}positive{% endif %}">{{ total_gain }}</td>
-        </tr>
-        
-    <a href="{{url_for('logout')}}" class="btn btn-info btn-lg">
-      <span class="glyphicon glyphicon-log-out"></span>Press here to logout
-    </a>
-      
-  </body>
-</html>
+      {% for stock in stocks %}
+      <tr>
+        <td>{{ stock[0] }}</td>
+        <td>{{ stock[1] }}</td>
+        <td>{{ stock[2] }}</td>
+        <td>{{ stock[3] }}</td>
+        <td>{{ stock[4] }}</td>
+        <td>{{ stock[5] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 
+  <table class="styled-table">
+    <thead>
+      <tr>
+        <th>Total Portfolio Value</th>
+        <th>Day Gain</th>
+        <th>Total Gain</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{ total_portfolio_value }}</td>
+        <td>{{ total_day_gain }}</td>
+        <td class="{% if total_gain|float < 0 %}negative{% else %}positive{% endif %}">{{ total_gain }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div id="popupForm" class="popup">
+    <form action="/submit" method="POST" class="popup-content">
+      <span id="closeButton" class="close">&times;</span>
+      <label for="Stock">Stock:</label>
+      <input type="text" id="Stock" name="Stock" required>
+      <label for="stockQuantity">Quantity:</label>
+      <input type="number" id="stockQuantity" name="stockQuantity" required>
+      <label for="purchasePrice">Purchase Price:</label>
+      <input type="number" id="purchasePrice" name="purchasePrice" required>
+      <label for="purchaseDate">Purchase Date:</label>
+      <input type="date" id="purchaseDate" name="purchaseDate" required class="center-input">
+      <button type="submit">+Add</button>
+    </form>
+    <form action="/screenshot" method="POST">
+      <input type="text" name="url" placeholder="Enter Website URL">
+      <button type="submit">Generate Screenshot</button>
+    </form>
+  </div>
+  <div class="scrollable-container">
+    <div id="news-container">
+      {% for article in news_articles %}
+      <a class="article-link" href="{{ article['url'] }}" target="_blank">
+        <div class="article">
+          <div class="image-container">
+            <img src="{{ article['image'] }}" alt="{{ article['title'] }}">
+          </div>
+          <div class="content-container">
+            <h2>{{ article['title'] }}</h2>
+            <div class="metadata">
+              <p class="publisher">{{ article['publisher'] }}</p>
+              <p class="time">{{ article['time'] }}</p>
+            </div>
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="header-row text-center">
+    <h2 class="top-holdings-heading">Watchlist</h2>
+    <form action="/watchlist" method="POST" class="watchlist-form">
+      <input type="text" id="stockInput" name="stockInput" placeholder="Enter stock symbol" required>
+      <button type="submit">Add</button>
+    </form>
+  </div>
+  <table class="styled-table">
+    <thead>
+      <tr>
+        <th>Stock Symbol</th>
+        <th>Current Price</th>
+        <th>Day Gain</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for stock, price, gain in watchlist_data %}
+      <tr>
+        <td>{{ stock }}</td>
+        <td>{{ price }}</td>
+        <td>{{ gain }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div id="sector-chart" class="chart-container">
+    {{ sector_html | safe }}
+  </div>
+
+  <script>
+    document.getElementById('addButton').addEventListener('click', function () {
+      document.getElementById('popupForm').style.display = 'block';
+    });
+
+    document.getElementById('closeButton').addEventListener('click', function () {
+      document.getElementById('popupForm').style.display = 'none';
+    });
+  </script>
+  <div>
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>Total Portfolio Value</th>
+          <th>Day Gain</th>
+          <th>Total Gain</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{{ total_portfolio_value }}</td>
+          <td>{{ total_day_gain }}</td>
+          <td class="{% if total_gain|float < 0 %}negative{% else %}positive{% endif %}">{{ total_gain }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+
+  <a href="{{url_for('logout')}}" class="btn btn-info btn-lg">
+    <span class="glyphicon glyphicon-log-out"></span>Press here to logout
+  </a>
+
+  <div class="footer-basic">
+    <footer>
+      <div class="social">
+        {{ share.create(title='Share with: ') }}
+      </div>
+      <p class="copyright">InvestMates © 2023</p>
+    </footer>
+  </div>
+</body>
+
+</html>
