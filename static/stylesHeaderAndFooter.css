@@ -1,6 +1,10 @@
+#navbar {
+    background-color: #fdecd4;
+}
+
 .footer-basic {
     padding: 40px 0;
-    background-color: #ffa947;
+    background-color: #fdecd4;
     color: #4b4c4d;
 }
 
@@ -8,7 +12,7 @@
     margin-top: 15px;
     text-align: center;
     font-size: 13px;
-    color: #ffca81;
+    color: #452903;
     margin-bottom: 0;
 }
 

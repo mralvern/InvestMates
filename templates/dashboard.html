@@ -5,38 +5,99 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../static/stylesHeaderAndFooter.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Rubik:400,700'>
   <link rel="stylesheet" href="../static/stylesDashboard.css">
-  <link rel="stylesheet" href="../static/stylesFooter.css">
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
-  <title>Dashboard</title>
+  <title>Dashboard - InvestMates</title>
 </head>
 
 <body>
   {{ share.load() }}
-  <h1>Here is your dashboard.</h1>
 
-  <div class="chart-selection">
-    <label for="chartType">Chart Type:</label>
-    <select id="chartType" name="chartType">
-      <option value="portfolio" {% if chart_type == 'portfolio' %}selected{% endif %}>Portfolio Value</option>
-      <option value="pnl" {% if chart_type == 'pnl' %}selected{% endif %}>PnL Percentage</option>
-    </select>
-  </div>
+  <nav class="navbar navbar-expand-lg" id="navbar">
+    <div class="container-fluid">
+      <a class="navbar-brand">InvestMates</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="{{ url_for('dashboard') }}">Dashboard</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="{{ url_for('dashboard') }}" role="button"
+              data-bs-toggle="dropdown" aria-expanded="false">
+              Share
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#">Action</a></li>
+              <li><a class="dropdown-item" href="#">Another action</a></li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li><a class="dropdown-item" href="#">Something else here</a></li>
+            </ul>
+          </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="{{url_for('logout')}}">
+              Logout
+            </a>
+          </li>
+        </ul>
 
-  <div id="portfolio-chart" class="chart-container">
-    {% if chart_type == 'portfolio' %}
-    {{ chart_html | safe }}
-    {% endif %}
-  </div>
+      </div>
+    </div>
+  </nav>
 
-  <div id="pnl-chart" class="chart-container">
-    {% if chart_type == 'pnl' %}
-    {{ chart_html | safe }}
-    {% endif %}
-  </div>
+  <container class="chart-selection">
+    <div>
+      <div class="chart-container">
+        <label for="chartType">Chart Type:</label>
+        <select id="chartType" name="chartType">
+          <option value="portfolio" {% if chart_type == 'portfolio' %}selected{% endif %}>Portfolio Value</option>
+          <option value="pnl" {% if chart_type == 'pnl' %}selected{% endif %}>PnL Percentage</option>
+        </select>
+      </div>
+
+      <div id="portfolio-chart" class="chart-container">
+        {% if chart_type == 'portfolio' %}
+        {{ chart_html | safe }}
+        {% endif %}
+      </div>
+
+      <div id="pnl-chart" class="chart-container">
+        {% if chart_type == 'pnl' %}
+        {{ chart_html | safe }}
+        {% endif %}
+      </div>
+    </div>
+
+    <div>
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th>Total Portfolio Value</th>
+            <th>Day Gain</th>
+            <th>Total Gain</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{ total_portfolio_value }}</td>
+            <td>{{ total_day_gain }}</td>
+            <td class="{% if total_gain|float < 0 %}negative{% else %}positive{% endif %}">{{ total_gain }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </container>
 
   <script>
     document.getElementById('chartType').addEventListener('change', function () {
@@ -50,47 +111,33 @@
     <button id="addButton" class="custom-button">Add</button>
   </div>
 
-  <table class="styled-table">
-    <thead>
-      <tr>
-        <th>Stock Name</th>
-        <th>Stock Quantity</th>
-        <th>Purchase Price</th>
-        <th>Current Price</th>
-        <th>Total Value</th>
-        <th>Day Gain</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for stock in stocks %}
-      <tr>
-        <td>{{ stock[0] }}</td>
-        <td>{{ stock[1] }}</td>
-        <td>{{ stock[2] }}</td>
-        <td>{{ stock[3] }}</td>
-        <td>{{ stock[4] }}</td>
-        <td>{{ stock[5] }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <container>
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>Stock Name</th>
+          <th>Stock Quantity</th>
+          <th>Purchase Price</th>
+          <th>Current Price</th>
+          <th>Total Value</th>
+          <th>Day Gain</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for stock in stocks %}
+        <tr>
+          <td>{{ stock[0] }}</td>
+          <td>{{ stock[1] }}</td>
+          <td>{{ stock[2] }}</td>
+          <td>{{ stock[3] }}</td>
+          <td>{{ stock[4] }}</td>
+          <td>{{ stock[5] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
 
-  <table class="styled-table">
-    <thead>
-      <tr>
-        <th>Total Portfolio Value</th>
-        <th>Day Gain</th>
-        <th>Total Gain</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>{{ total_portfolio_value }}</td>
-        <td>{{ total_day_gain }}</td>
-        <td class="{% if total_gain|float < 0 %}negative{% else %}positive{% endif %}">{{ total_gain }}</td>
-      </tr>
-    </tbody>
-  </table>
+  </container>
 
   <div id="popupForm" class="popup">
     <form action="/submit" method="POST" class="popup-content">
@@ -109,26 +156,6 @@
       <input type="text" name="url" placeholder="Enter Website URL">
       <button type="submit">Generate Screenshot</button>
     </form>
-  </div>
-  <div class="scrollable-container">
-    <div id="news-container">
-      {% for article in news_articles %}
-      <a class="article-link" href="{{ article['url'] }}" target="_blank">
-        <div class="article">
-          <div class="image-container">
-            <img src="{{ article['image'] }}" alt="{{ article['title'] }}">
-          </div>
-          <div class="content-container">
-            <h2>{{ article['title'] }}</h2>
-            <div class="metadata">
-              <p class="publisher">{{ article['publisher'] }}</p>
-              <p class="time">{{ article['time'] }}</p>
-            </div>
-          </div>
-        </div>
-      </a>
-      {% endfor %}
-    </div>
   </div>
 
   <div class="header-row text-center">
@@ -170,29 +197,27 @@
       document.getElementById('popupForm').style.display = 'none';
     });
   </script>
-  <div>
-    <table class="styled-table">
-      <thead>
-        <tr>
-          <th>Total Portfolio Value</th>
-          <th>Day Gain</th>
-          <th>Total Gain</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>{{ total_portfolio_value }}</td>
-          <td>{{ total_day_gain }}</td>
-          <td class="{% if total_gain|float < 0 %}negative{% else %}positive{% endif %}">{{ total_gain }}</td>
-        </tr>
-      </tbody>
-    </table>
+
+  <div class="scrollable-container">
+    <div id="news-container">
+      {% for article in news_articles %}
+      <a class="article-link" href="{{ article['url'] }}" target="_blank">
+        <div class="article">
+          <div class="image-container">
+            <img src="{{ article['image'] }}" alt="{{ article['title'] }}">
+          </div>
+          <div class="content-container">
+            <h2>{{ article['title'] }}</h2>
+            <div class="metadata">
+              <p class="publisher">{{ article['publisher'] }}</p>
+              <p class="time">{{ article['time'] }}</p>
+            </div>
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
   </div>
-
-
-  <a href="{{url_for('logout')}}" class="btn btn-info btn-lg">
-    <span class="glyphicon glyphicon-log-out"></span>Press here to logout
-  </a>
 
   <div class="footer-basic">
     <footer>

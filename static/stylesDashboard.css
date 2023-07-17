@@ -1,17 +1,12 @@
 body {
-    background: #fbf8e7;
+    background: #fff6ed;
     font-family: 'Rubik', sans-serif;
 }
 
-body {
-    background: #fbf8e7;
-    font-family: 'Rubik', sans-serif;
-}
 
 label {
     display: inline-block;
     margin-bottom: 7px;
-    padding-left: 35%;
 }
 
 input[type="text"],
@@ -116,7 +111,8 @@ button {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 20px
+    margin: 20px;
+    padding: 1vw;
 }
 
 .center-input {
