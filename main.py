@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, redirect, request, flash, get_flashed_messages
+from flask import Flask, render_template, url_for, redirect, request, flash, get_flashed_messages, send_file
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 from flask_wtf import FlaskForm
@@ -16,6 +16,8 @@ import requests
 from bs4 import BeautifulSoup
 from newspaper import Article
 from flask_share import Share
+import csv
+import io
 
 app = Flask(__name__)
 stocks = ["these are my stocks"]
@@ -262,7 +264,29 @@ def dashboard():
         db.func.avg(Stock.purchase_price).label('avg_purchase_price')
     ).filter_by(user_id=current_user.id).group_by(Stock.name).all()
 
-    if request.method == "POST":
+    if request.method == 'POST':
+        if 'csvFile' in request.files:
+            csv_file = request.files['csvFile']
+            if csv_file.filename.endswith('.csv'):
+                csv_data = csv.reader(csv_file.read().decode('utf-8').splitlines())
+                next(csv_data)
+
+                for row in csv_data:
+                    stock_name = row[0]
+                    purchase_price = float(row[1])
+                    purchase_date = datetime.strptime(row[2], '%d/%m/%Y').date()
+
+
+                    stock = Stock(name=stock_name, user_id=current_user.id, 
+                                  purchase_price=purchase_price, purchase_date=purchase_date)
+                    db.session.add(stock)
+                db.session.commit()
+
+                flash('Stocks imported successfully!', 'success')
+            else:
+                flash('Invalid file format. Please select a CSV file.', 'danger')
+
+            return redirect(url_for('dashboard'))
         
         return redirect(url_for('dashboard'))
     
