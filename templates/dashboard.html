@@ -8,8 +8,11 @@
   <link rel="stylesheet" href="../static/stylesHeaderAndFooter.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Rubik:400,700'>
-  <link rel="stylesheet" href="../static/stylesDashboard.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Staatliches&display=swap">
+  <link rel="stylesheet" href="../static/stylesPages.css">
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 
   <title>Dashboard - InvestMates</title>
 </head>
@@ -17,48 +20,56 @@
 <body>
   {{ share.load() }}
 
-  <nav class="navbar navbar-expand-lg" id="navbar">
+  <nav class="navbar fixed-top" id="navbar">
     <div class="container-fluid">
-      <a class="navbar-brand">InvestMates</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <a class="navbar-brand">InvestMates</a>
+        <button class="navbar-toggler" id="navbar-button" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="{{ url_for('dashboard') }}">Dashboard</a>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="{{ url_for('dashboard') }}" role="button"
-              data-bs-toggle="dropdown" aria-expanded="false">
-              Share
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#">Action</a></li>
-              <li><a class="dropdown-item" href="#">Another action</a></li>
-              <li>
-                <hr class="dropdown-divider">
-              </li>
-              <li><a class="dropdown-item" href="#">Something else here</a></li>
+        </button>
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasNavbarLabel">InvestMates</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
+            <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{{ url_for('dashboard') }}">Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{{ url_for('watchlist') }}">Watchlist</a>
+            </li>
+            <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="{{ url_for('dashboard') }}" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Share
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Action</a></li>
+                            <li><a class="dropdown-item" href="#">Another action</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="#">Something else here</a></li>
+                        </ul>
+                    </li>
             </ul>
-          </li>
-        </ul>
-        <ul class="navbar-nav ml-auto">
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="{{url_for('logout')}}">
-              Logout
-            </a>
-          </li>
-        </ul>
-
-      </div>
+            <ul class="navbar-nav ml-auto">
+                    <li class="nav-item mx-auto">
+                        <a type="button" class="btn btn-outline-danger" aria-current="page" href="{{url_for('logout')}}">
+                            Logout
+                        </a>
+                    </li>
+            </ul>
+            </form>
+        </div>
+        </div>
     </div>
   </nav>
 
-  <container class="chart-selection">
+  <container id="chart-container">
     <div>
-      <div class="chart-container">
+      <div class="chart-div">
         <label for="chartType">Chart Type:</label>
         <select id="chartType" name="chartType">
           <option value="portfolio" {% if chart_type == 'portfolio' %}selected{% endif %}>Portfolio Value</option>
@@ -66,21 +77,24 @@
         </select>
       </div>
 
-      <div id="portfolio-chart" class="chart-container">
+      <div id="portfolio-chart" class="chart-div">
         {% if chart_type == 'portfolio' %}
         {{ chart_html | safe }}
         {% endif %}
       </div>
 
-      <div id="pnl-chart" class="chart-container">
+      <div id="pnl-chart" class="chart-div">
         {% if chart_type == 'pnl' %}
         {{ chart_html | safe }}
         {% endif %}
       </div>
     </div>
+  </container>
 
-    <div>
-      <table class="styled-table">
+  <container id='portfolio'>
+    <h2>Portfolio</h2>
+    <div id="portfolio-div">
+      <table class="styled-table" id="portfolio-table">
         <thead>
           <tr>
             <th>Total Portfolio Value</th>
@@ -96,6 +110,10 @@
           </tr>
         </tbody>
       </table>
+
+      <div id="sector-chart">
+        {{ sector_html | safe }}
+      </div>
     </div>
   </container>
 
@@ -158,36 +176,6 @@
     </form>
   </div>
 
-  <div class="header-row text-center">
-    <h2 class="top-holdings-heading">Watchlist</h2>
-    <form action="/watchlist" method="POST" class="watchlist-form">
-      <input type="text" id="stockInput" name="stockInput" placeholder="Enter stock symbol" required>
-      <button type="submit">Add</button>
-    </form>
-  </div>
-  <table class="styled-table">
-    <thead>
-      <tr>
-        <th>Stock Symbol</th>
-        <th>Current Price</th>
-        <th>Day Gain</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for stock, price, gain in watchlist_data %}
-      <tr>
-        <td>{{ stock }}</td>
-        <td>{{ price }}</td>
-        <td>{{ gain }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-
-  <div id="sector-chart" class="chart-container">
-    {{ sector_html | safe }}
-  </div>
-
   <script>
     document.getElementById('addButton').addEventListener('click', function () {
       document.getElementById('popupForm').style.display = 'block';
@@ -198,27 +186,6 @@
     });
   </script>
 
-  <div class="scrollable-container">
-    <div id="news-container">
-      {% for article in news_articles %}
-      <a class="article-link" href="{{ article['url'] }}" target="_blank">
-        <div class="article">
-          <div class="image-container">
-            <img src="{{ article['image'] }}" alt="{{ article['title'] }}">
-          </div>
-          <div class="content-container">
-            <h2>{{ article['title'] }}</h2>
-            <div class="metadata">
-              <p class="publisher">{{ article['publisher'] }}</p>
-              <p class="time">{{ article['time'] }}</p>
-            </div>
-          </div>
-        </div>
-      </a>
-      {% endfor %}
-    </div>
-  </div>
-
   <div class="footer-basic">
     <footer>
       <div class="social">
@@ -227,6 +194,7 @@
       <p class="copyright">InvestMates © 2023</p>
     </footer>
   </div>
+
 </body>
 
 </html>

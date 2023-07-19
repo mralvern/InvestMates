@@ -40,15 +40,19 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(20), nullable=False, unique=True)
     email = db.Column(db.String(80), nullable=False, unique=True)
     password = db.Column(db.String(80), nullable=False)
-    stocks = relationship('Stock', backref='user', cascade='all, delete-orphan')
+    stocks = relationship('Stock', backref='user',
+                          cascade='all, delete-orphan')
     watchlist = relationship('Watchlist', backref='user', uselist=False)
+
 
 class Stock(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    purchase_price = db.Column(db.Float, nullable = False)
-    purchase_date = db.Column(db.DateTime, nullable = False, default=datetime.utcnow)
+    purchase_price = db.Column(db.Float, nullable=False)
+    purchase_date = db.Column(
+        db.DateTime, nullable=False, default=datetime.utcnow)
+
 
 class Watchlist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -60,20 +64,21 @@ class Watchlist(db.Model):
 
 class RegisterForm(FlaskForm):
     email = StringField(validators=[
-                            InputRequired(), Email(), Length(min=6, max=50)], render_kw={"placeholder": "Email"})
-    
+        InputRequired(), Email(), Length(min=6, max=50)], render_kw={"placeholder": "Email"})
+
     username = StringField(validators=[
-                            InputRequired(), Length(min=4, max=20)], render_kw={"placeholder": "Username"})
+        InputRequired(), Length(min=4, max=20)], render_kw={"placeholder": "Username"})
 
     password = PasswordField(validators=[
-                            InputRequired(), Length(min=8, max=20)], render_kw={"placeholder": "Password"})
+        InputRequired(), Length(min=8, max=20)], render_kw={"placeholder": "Password"})
 
     submit = SubmitField('Register')
 
     def validate_email(self, email):
         existing_user_email = User.query.filter_by(email=email.data).first()
         if existing_user_email:
-            raise ValidationError('That email address is already in use. Please log in instead.')
+            raise ValidationError(
+                'That email address is already in use. Please log in instead.')
 
     def validate_username(self, username):
         existing_user_username = User.query.filter_by(
@@ -85,12 +90,13 @@ class RegisterForm(FlaskForm):
 
 class LoginForm(FlaskForm):
     username = StringField(validators=[
-                            InputRequired(), Length(min=4, max=20)], render_kw={"placeholder": "Username"})
+        InputRequired(), Length(min=4, max=20)], render_kw={"placeholder": "Username"})
 
     password = PasswordField(validators=[
-                            InputRequired(), Length(min=8, max=20)], render_kw={"placeholder": "Password"})
+        InputRequired(), Length(min=8, max=20)], render_kw={"placeholder": "Password"})
 
     submit = SubmitField('Login')
+
 
 def get_stock_price(stock_name):
     ticker = yf.Ticker(stock_name)
@@ -100,14 +106,17 @@ def get_stock_price(stock_name):
         current_price = stock_info.get('previousClose')
     return current_price
 
+
 def get_open_price(stock_name):
     ticker = yf.Ticker(stock_name)
     stock_info = ticker.info
     open_price = stock_info.get('open')
     return open_price
 
+
 def generate_portfolio_chart(user_id):
-    stocks_chart = db.session.query(Stock.name, Stock.purchase_date).filter_by(user_id=user_id).all()
+    stocks_chart = db.session.query(
+        Stock.name, Stock.purchase_date).filter_by(user_id=user_id).all()
     data = pd.DataFrame()
 
     for stock in stocks_chart:
@@ -115,18 +124,18 @@ def generate_portfolio_chart(user_id):
         start_date = stock[1]
         chart_data = yf.download(ticker, start=start_date)
         data = pd.concat([data, chart_data['Close']], axis=1)
-    
+
     combined_prices = data.sum(axis=1)
 
     fig = go.Figure(data=go.Scatter(x=data.index, y=combined_prices))
 
     fig.update_layout(
-    title='Total Portfolio Value vs Date',
-    xaxis_title='Date',
-    yaxis_title='Total Portfolio Value',
-    width=750,
-    height=500,
-    margin=dict(l=20, r=20, t=50, b=10)
+        title='Total Portfolio Value vs Date',
+        xaxis_title='Date',
+        yaxis_title='Total Portfolio Value',
+        width=750,
+        height=500,
+        margin=dict(l=20, r=20, t=50, b=10)
     )
 
     fig.update_layout(hovermode="x")
@@ -134,8 +143,10 @@ def generate_portfolio_chart(user_id):
     chart_html = fig.to_html(full_html=False)
     return chart_html
 
+
 def generate_pnl_chart(user_id):
-    stocks = db.session.query(Stock.name, Stock.purchase_date).filter_by(user_id=user_id).all()
+    stocks = db.session.query(
+        Stock.name, Stock.purchase_date).filter_by(user_id=user_id).all()
     data = pd.DataFrame()
 
     for stock in stocks:
@@ -143,28 +154,31 @@ def generate_pnl_chart(user_id):
         start_date = stock[1]
         chart_data = yf.download(ticker, start=start_date)
         data = pd.concat([data, chart_data['Close']], axis=1)
-    
+
     combined_prices = data.sum(axis=1)
-    purchase_prices = db.session.query(Stock.purchase_price).filter_by(user_id=user_id).all()
+    purchase_prices = db.session.query(
+        Stock.purchase_price).filter_by(user_id=user_id).all()
     total_purchase_price = sum([price[0] for price in purchase_prices])
-    
-    pnl_percentage = ((combined_prices - total_purchase_price) / total_purchase_price) * 100
+
+    pnl_percentage = (
+        (combined_prices - total_purchase_price) / total_purchase_price) * 100
 
     fig = go.Figure(data=go.Scatter(x=data.index, y=pnl_percentage))
 
     fig.update_layout(
-    title='PnL Percentage vs Date',
-    xaxis_title='Date',
-    yaxis_title='PnL Percentage',
-    width=750,
-    height=500,
-    margin=dict(l=20, r=20, t=50, b=10)
+        title='PnL Percentage vs Date',
+        xaxis_title='Date',
+        yaxis_title='PnL Percentage',
+        width=750,
+        height=500,
+        margin=dict(l=20, r=20, t=50, b=10)
     )
 
     fig.update_layout(hovermode="x")
 
     chart_html = fig.to_html(full_html=False)
     return chart_html
+
 
 def get_news_articles(user_id):
     stocks = db.session.query(Stock.name).filter_by(user_id=user_id).all()
@@ -201,10 +215,12 @@ def get_news_articles(user_id):
             else:
                 time = str(int(time_diff * 60)) + ' minutes ago'
 
-            article_list.append({'url': url, 'title': title, 'time': time, 'publisher': publisher, 'image': image, 'publishTime': publishTime})
-    
-    article_list.sort(reverse = True, key = lambda x: x['publishTime'])
+            article_list.append({'url': url, 'title': title, 'time': time,
+                                'publisher': publisher, 'image': image, 'publishTime': publishTime})
+
+    article_list.sort(reverse=True, key=lambda x: x['publishTime'])
     return article_list[:5]
+
 
 def get_sector_pie(user_id):
     stocks = db.session.query(Stock.name).filter_by(user_id=user_id).all()
@@ -224,10 +240,12 @@ def get_sector_pie(user_id):
 
             total_portfolio_value += current_price
 
-    data = pd.DataFrame({'Sector': list(sector_values.keys()), 'Value': list(sector_values.values())})
+    data = pd.DataFrame({'Sector': list(sector_values.keys()),
+                        'Value': list(sector_values.values())})
     data['Percentage'] = data['Value'] / total_portfolio_value * 100
 
-    fig = px.pie(data, values='Percentage', names='Sector', title='Portfolio Composition by Sector', color_discrete_sequence=px.colors.sequential.RdBu)
+    fig = px.pie(data, values='Percentage', names='Sector',
+                 title='Portfolio Composition by Sector', color_discrete_sequence=px.colors.sequential.RdBu)
 
     fig.update_traces(textposition='inside', textinfo='percent+label')
     fig.update_layout(legend_title='Sector', width=500, height=500)
@@ -253,7 +271,7 @@ def login():
     return render_template('login.html', form=form)
 
 
-@app.route('/dashboard', methods=['POST',"GET"])
+@app.route('/dashboard', methods=['POST', "GET"])
 @login_required
 def dashboard():
     stocks = db.session.query(
@@ -263,13 +281,13 @@ def dashboard():
     ).filter_by(user_id=current_user.id).group_by(Stock.name).all()
 
     if request.method == "POST":
-        
+
         return redirect(url_for('dashboard'))
-    
+
     total_portfolio_value = 0
     total_day_gain = 0
     total_gain = 0
-    
+
     stocks_with_data = []
     for stock in stocks:
         stock_name = stock[0]
@@ -290,10 +308,10 @@ def dashboard():
             '{:.2f}'.format(day_gain)
         )
         stocks_with_data.append(stock_data)
-        
+
         total_portfolio_value += total_value
         total_gain += total_value - avg_purchase_price * total_quantity
-    
+
     chart_type = request.args.get('chart_type', 'portfolio')
 
     if chart_type == 'portfolio':
@@ -304,23 +322,102 @@ def dashboard():
     news_articles = get_news_articles(current_user.id)
     sector_html = get_sector_pie(current_user.id)
 
-    watchlist = current_user.watchlist.stocks.split(',') if current_user.watchlist else []
-    watchlist_current_prices = current_user.watchlist.current_prices.split(',') if current_user.watchlist else []
-    watchlist_day_gains = current_user.watchlist.day_gains.split(',') if current_user.watchlist else []
+    watchlist = current_user.watchlist.stocks.split(
+        ',') if current_user.watchlist else []
+    watchlist_current_prices = current_user.watchlist.current_prices.split(
+        ',') if current_user.watchlist else []
+    watchlist_day_gains = current_user.watchlist.day_gains.split(
+        ',') if current_user.watchlist else []
 
-    watchlist_data = zip(watchlist, watchlist_current_prices, watchlist_day_gains)
+    watchlist_data = zip(
+        watchlist, watchlist_current_prices, watchlist_day_gains)
 
     return render_template('dashboard.html',
-        stocks=stocks_with_data,
-        total_portfolio_value='{:.2f}'.format(total_portfolio_value),
-        total_day_gain='{:.2f}'.format(total_day_gain),
-        total_gain='{:.2f}'.format(total_gain),
-        chart_html = chart_html,
-        chart_type = chart_type,
-        news_articles = news_articles,
-        watchlist_data = watchlist_data,
-        sector_html = sector_html
+                           stocks=stocks_with_data,
+                           total_portfolio_value='{:.2f}'.format(
+                               total_portfolio_value),
+                           total_day_gain='{:.2f}'.format(total_day_gain),
+                           total_gain='{:.2f}'.format(total_gain),
+                           chart_html=chart_html,
+                           chart_type=chart_type,
+                           news_articles=news_articles,
+                           watchlist_data=watchlist_data,
+                           sector_html=sector_html
+                           )
+
+
+@app.route('/watchlist', methods=['POST', 'GET'])
+def watchlist():
+    stocks = db.session.query(
+        Stock.name,
+        db.func.count().label('total_quantity'),
+        db.func.avg(Stock.purchase_price).label('avg_purchase_price')
+    ).filter_by(user_id=current_user.id).group_by(Stock.name).all()
+
+    if request.method == "POST":
+
+        return redirect(url_for('dashboard'))
+
+    total_portfolio_value = 0
+    total_day_gain = 0
+    total_gain = 0
+
+    stocks_with_data = []
+    for stock in stocks:
+        stock_name = stock[0]
+        current_price = get_stock_price(stock_name)
+        total_quantity = stock[1]
+        avg_purchase_price = stock[2]
+        total_value = total_quantity * current_price
+        open_price = get_open_price(stock_name)
+        day_gain = total_quantity * (current_price - open_price)
+        total_day_gain += day_gain
+
+        stock_data = (
+            stock_name,
+            total_quantity,
+            '{:.2f}'.format(avg_purchase_price),
+            '{:.2f}'.format(current_price),
+            '{:.2f}'.format(total_value),
+            '{:.2f}'.format(day_gain)
         )
+        stocks_with_data.append(stock_data)
+
+        total_portfolio_value += total_value
+        total_gain += total_value - avg_purchase_price * total_quantity
+
+    chart_type = request.args.get('chart_type', 'portfolio')
+
+    if chart_type == 'portfolio':
+        chart_html = generate_portfolio_chart(current_user.id)
+    elif chart_type == 'pnl':
+        chart_html = generate_pnl_chart(current_user.id)
+
+    news_articles = get_news_articles(current_user.id)
+    sector_html = get_sector_pie(current_user.id)
+
+    watchlist = current_user.watchlist.stocks.split(
+        ',') if current_user.watchlist else []
+    watchlist_current_prices = current_user.watchlist.current_prices.split(
+        ',') if current_user.watchlist else []
+    watchlist_day_gains = current_user.watchlist.day_gains.split(
+        ',') if current_user.watchlist else []
+
+    watchlist_data = zip(
+        watchlist, watchlist_current_prices, watchlist_day_gains)
+
+    return render_template('watchlist.html',
+                           stocks=stocks_with_data,
+                           total_portfolio_value='{:.2f}'.format(
+                               total_portfolio_value),
+                           total_day_gain='{:.2f}'.format(total_day_gain),
+                           total_gain='{:.2f}'.format(total_gain),
+                           chart_html=chart_html,
+                           chart_type=chart_type,
+                           news_articles=news_articles,
+                           watchlist_data=watchlist_data,
+                           sector_html=sector_html
+                           )
 
 
 @app.route('/submit', methods=['POST'])
@@ -329,18 +426,20 @@ def submit():
         stock_name = request.form.get("Stock").upper()
         if not stock_name:
             return redirect(url_for('dashboard'))
-        
+
         stock_quantity = int(request.form.get("stockQuantity"))
         purchase_price = request.form.get("purchasePrice")
-        purchase_date = datetime.strptime(request.form.get("purchaseDate"), '%Y-%m-%d').date()
+        purchase_date = datetime.strptime(
+            request.form.get("purchaseDate"), '%Y-%m-%d').date()
 
         for share in range(stock_quantity):
-            stock = Stock(name=stock_name, user_id=current_user.id, 
-                purchase_price=purchase_price, purchase_date=purchase_date)
+            stock = Stock(name=stock_name, user_id=current_user.id,
+                          purchase_price=purchase_price, purchase_date=purchase_date)
             db.session.add(stock)
             db.session.commit()
 
     return redirect(url_for('dashboard'))
+
 
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
@@ -355,7 +454,8 @@ def register():
 
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data)
-        new_user = User(email=form.email.data, username=form.username.data, password=hashed_password)
+        new_user = User(email=form.email.data,
+                        username=form.username.data, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
 
@@ -366,6 +466,7 @@ def register():
         return redirect(url_for('login'))
 
     return render_template('register.html', form=form)
+
 
 @app.route('/watchlist', methods=['POST'])
 @login_required
@@ -400,7 +501,8 @@ def add_to_watchlist():
 
     return redirect(url_for('dashboard'))
 
-if __name__ == "__main__":  
+
+if __name__ == "__main__":
     with app.app_context():
         db.create_all()
     app.run(debug=True)

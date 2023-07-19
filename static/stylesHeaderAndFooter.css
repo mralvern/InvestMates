@@ -1,7 +1,3 @@
-#navbar {
-    background-color: #fdecd4;
-}
-
 .footer-basic {
     padding: 40px 0;
     background-color: #fdecd4;
@@ -20,4 +16,17 @@
     font-family: 'Rubik', sans-serif;
     text-align: center;
     font-size: 13px;
+}
+
+#navbar {
+    display: flex;
+    justify-content: space-between;
+    background-color: #fdecd4;
+    padding: 0;
+    font-family: 'Staatliches', cursive;
+}
+
+#offcanvasNavbar {
+    background-color: #fdecd4;
+    color: #4b4c4d;
 }

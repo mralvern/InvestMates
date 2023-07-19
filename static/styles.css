@@ -1,6 +1,13 @@
 body {
     background: #fff6ed;
     font-family: 'Rubik', sans-serif;
+    padding-top: 160px;
+}
+
+@media (max-width: 979px) {
+  body {
+    padding-top: 0px;
+  }
 }
 
 h1 {

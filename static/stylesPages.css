@@ -1,7 +1,18 @@
 body {
     background: #fff6ed;
     font-family: 'Rubik', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding-top: 70px;
 }
+
+@media (max-width: 979px) {
+  body {
+    padding-top: 0px;
+  }
+}
+
 
 
 label {
@@ -51,7 +62,7 @@ input[type="submit"]:hover {
 a {
     display: block;
     text-align: center;
-    margin-top: 20px;
+    margin: 15px 20px;
 }
 
 button {
@@ -64,6 +75,25 @@ button {
     cursor: pointer;
     user-select: none;
     border: 1px solid transparent;
+}
+
+h2 {
+    font-size: 30px;
+    margin: 15px 8px;
+    flex-shrink: 0;
+    color: rgba(0, 0, 0);
+    text-align: center;
+}
+
+.article {
+    display: flex;
+    margin-bottom: 10px;
+    background-color: hsl(0, 0%, 100%);
+    border-radius: 4px;
+    height: 130px;
+}
+
+.label {
     margin: 0 auto;
 }
 
@@ -107,7 +137,7 @@ button {
     color: green;
 }
 
-.chart-container {
+.chart-div {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -136,9 +166,15 @@ button {
     background-color: #45a049;
 }
 
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
 .top-holdings-heading {
     color: #333;
-    font-size: 24px;
     margin-right: 435px;
     margin-bottom: 6px;
     display: inline-block;
@@ -174,21 +210,6 @@ button {
     width: 50%;
 }
 
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-}
-
-.article {
-    display: flex;
-    margin-bottom: 10px;
-    background-color: hsl(0, 0%, 100%);
-    border-radius: 4px;
-    height: 130px;
-}
-
 .image-container {
     width: 185px;
     height: 130px;
@@ -209,15 +230,6 @@ button {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-}
-
-h2 {
-    font-size: 17px;
-    margin: 0;
-    flex-shrink: 0;
-    margin-bottom: 10px;
-    color: rgba(0, 0, 0);
-    text-align: left;
 }
 
 .metadata {
@@ -250,4 +262,30 @@ h2 {
     background-color: #ffffff;
     color: #000000;
     margin-top: 10px;
+}
+
+#chartType {
+    margin: 8px;
+}
+
+#chart-container {
+    background-color: #FFFBE9;
+}
+
+#portfolio {
+    background-color: #E3CAA5;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 10px;
+}
+
+#portfolio-div {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: center;
+    align-items: baseline;
+}
+
+#portfolio-table {
+    margin: auto 0;
 }
