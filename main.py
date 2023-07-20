@@ -72,7 +72,8 @@ class RegisterForm(FlaskForm):
     password = PasswordField(validators=[
         InputRequired(), Length(min=8, max=20)], render_kw={"placeholder": "Password"})
 
-    submit = SubmitField('Register')
+    submit = SubmitField('Register', render_kw={
+                         "class": "btn btn-outline-primary btn-register mx-auto my-auto"})
 
     def validate_email(self, email):
         existing_user_email = User.query.filter_by(email=email.data).first()
@@ -95,7 +96,8 @@ class LoginForm(FlaskForm):
     password = PasswordField(validators=[
         InputRequired(), Length(min=8, max=20)], render_kw={"placeholder": "Password"})
 
-    submit = SubmitField('Login')
+    submit = SubmitField('Login', render_kw={
+                         "class": "btn btn-outline-success btn-login mx-auto my-auto"})
 
 
 def get_stock_price(stock_name):
@@ -135,7 +137,8 @@ def generate_portfolio_chart(user_id):
         yaxis_title='Total Portfolio Value',
         width=750,
         height=500,
-        margin=dict(l=20, r=20, t=50, b=10)
+        margin=dict(l=20, r=20, t=50, b=10),
+        paper_bgcolor="#fffbe9"
     )
 
     fig.update_layout(hovermode="x")
@@ -171,7 +174,8 @@ def generate_pnl_chart(user_id):
         yaxis_title='PnL Percentage',
         width=750,
         height=500,
-        margin=dict(l=20, r=20, t=50, b=10)
+        margin=dict(l=20, r=20, t=50, b=10),
+        paper_bgcolor="#fffbe9"
     )
 
     fig.update_layout(hovermode="x")
@@ -248,7 +252,8 @@ def get_sector_pie(user_id):
                  title='Portfolio Composition by Sector', color_discrete_sequence=px.colors.sequential.RdBu)
 
     fig.update_traces(textposition='inside', textinfo='percent+label')
-    fig.update_layout(legend_title='Sector', width=500, height=500)
+    fig.update_layout(legend_title='Sector', width=500,
+                      height=500, paper_bgcolor="#E3CAA5")
 
     sector_html = fig.to_html(full_html=False)
     return sector_html
@@ -420,6 +425,40 @@ def watchlist():
                            )
 
 
+@app.route('/watchlistAdd', methods=['POST'])
+@login_required
+def add_to_watchlist():
+    stock_symbol = request.form.get('stockInput').upper()
+    if stock_symbol:
+        watchlist = current_user.watchlist
+        if watchlist:
+            stocks = watchlist.stocks.split(',')
+            if stock_symbol not in stocks:
+                stocks.append(stock_symbol)
+                watchlist.stocks = ','.join(stocks)
+                current_prices = watchlist.current_prices.split(',')
+                day_gains = watchlist.day_gains.split(',')
+                current_price = get_stock_price(stock_symbol)
+                open_price = get_open_price(stock_symbol)
+                day_gain = (current_price - open_price)
+                current_prices.append('{:.2f}'.format(current_price))
+                day_gains.append('{:.2f}'.format(day_gain))
+                watchlist.current_prices = ','.join(current_prices)
+                watchlist.day_gains = ','.join(day_gains)
+        else:
+            watchlist = Watchlist(user_id=current_user.id, stocks=stock_symbol)
+            current_price = get_stock_price(stock_symbol)
+            open_price = get_open_price(stock_symbol)
+            day_gain = (current_price - open_price)
+            watchlist.current_prices = '{:.2f}'.format(current_price)
+            watchlist.day_gains = '{:.2f}'.format(day_gain)
+            db.session.add(watchlist)
+
+        db.session.commit()
+
+    return redirect(url_for('watchlist'))
+
+
 @app.route('/submit', methods=['POST'])
 def submit():
     if request.method == 'POST':
@@ -466,40 +505,6 @@ def register():
         return redirect(url_for('login'))
 
     return render_template('register.html', form=form)
-
-
-@app.route('/watchlist', methods=['POST'])
-@login_required
-def add_to_watchlist():
-    stock_symbol = request.form.get('stockInput').upper()
-    if stock_symbol:
-        watchlist = current_user.watchlist
-        if watchlist:
-            stocks = watchlist.stocks.split(',')
-            if stock_symbol not in stocks:
-                stocks.append(stock_symbol)
-                watchlist.stocks = ','.join(stocks)
-                current_prices = watchlist.current_prices.split(',')
-                day_gains = watchlist.day_gains.split(',')
-                current_price = get_stock_price(stock_symbol)
-                open_price = get_open_price(stock_symbol)
-                day_gain = (current_price - open_price)
-                current_prices.append('{:.2f}'.format(current_price))
-                day_gains.append('{:.2f}'.format(day_gain))
-                watchlist.current_prices = ','.join(current_prices)
-                watchlist.day_gains = ','.join(day_gains)
-        else:
-            watchlist = Watchlist(user_id=current_user.id, stocks=stock_symbol)
-            current_price = get_stock_price(stock_symbol)
-            open_price = get_open_price(stock_symbol)
-            day_gain = (current_price - open_price)
-            watchlist.current_prices = '{:.2f}'.format(current_price)
-            watchlist.day_gains = '{:.2f}'.format(day_gain)
-            db.session.add(watchlist)
-
-        db.session.commit()
-
-    return redirect(url_for('dashboard'))
 
 
 if __name__ == "__main__":

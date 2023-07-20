@@ -7,13 +7,19 @@ body {
     padding-top: 70px;
 }
 
+container {
+    padding: 10px;
+}
+
 @media (max-width: 979px) {
   body {
     padding-top: 0px;
   }
 }
 
-
+div {
+    padding: 10px;    
+}
 
 label {
     display: inline-block;
@@ -112,8 +118,8 @@ h2 {
 }
 
 .styled-table thead tr {
-    background-color: #000000;
-    color: #ffffff;
+    background-color: #2D4356;
+    color: #F2EAD3;
     text-align: left;
 }
 
@@ -126,7 +132,7 @@ h2 {
 }
 
 .styled-table tbody tr:last-of-type {
-    border-bottom: 2px solid #000000;
+    border-bottom: 1px solid #000000;
 }
 
 .negative {
@@ -150,34 +156,11 @@ h2 {
     display: block;
 }
 
-.custom-button {
-    padding: 6px 12px;
-    border-radius: 8px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    outline: none;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    display: inline-block;
-}
-
-.custom-button:hover {
-    background-color: #45a049;
-}
-
 .close {
     color: #aaa;
     float: right;
     font-size: 28px;
     font-weight: bold;
-}
-
-.top-holdings-heading {
-    color: #333;
-    margin-right: 435px;
-    margin-bottom: 6px;
-    display: inline-block;
 }
 
 .popup-content {
@@ -288,4 +271,22 @@ h2 {
 
 #portfolio-table {
     margin: auto 0;
+}
+
+#top-holdings-heading {
+    color: #333;
+    margin-right: 435px;
+    margin-bottom: 6px;
+    display: inline-block;
+}
+
+#watchlist-heading {
+    color: #333;
+    margin-right: 275px;
+    margin-bottom: 6px;
+    display: inline-block;
+}
+
+#watchlist-table {
+    background-color: #E3CAA5;
 }
