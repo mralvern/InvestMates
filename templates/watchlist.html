@@ -66,11 +66,11 @@
     </nav>
 
     <div>
-        <div class="header-row text-center">
-            <h2 id="watchlist-heading">Watchlist</h2> 
-            <button class="btn btn-outline-secondary" type="submit">Add</button>
-        </div>
         <form action="/watchlistAdd" method="POST" class="watchlist-form">
+            <div class="header-row text-center">
+                <h2 id="watchlist-heading" class="header-row text-center">Watchlist</h2> 
+                <button class="btn btn-outline-secondary" type="submit">Add</button>
+            </div>
             <input type="text" id="stockInput" name="stockInput" placeholder="Enter stock symbol" required>
         </form>
     </div>
@@ -92,25 +92,27 @@
             {% endfor %}
         </tbody>
     </table>
-
-    <div class="scrollable-container" id="news-container">
-        {% for article in news_articles %}
-        <a class="article-link" href="{{ article['url'] }}" target="_blank">
-            <div class="article">
-                <div class="image-container">
-                    <img src="{{ article['image'] }}" alt="{{ article['title'] }}">
-                </div>
-                <div class="content-container">
-                    <h2>{{ article['title'] }}</h2>
-                    <div class="metadata">
-                        <p class="publisher">{{ article['publisher'] }}</p>
-                        <p class="time">{{ article['time'] }}</p>
+    <container id="watchlist-news-container">
+        <h2>Watchlist News</h2>
+        <div class="scrollable-container mx-auto" id="news-container">
+            {% for article in news_articles %}
+            <a class="article-link" href="{{ article['url'] }}" target="_blank">
+                <div class="article" style="background-color: #E3CAA5;">
+                    <div class="image-container">
+                        <img src="{{ article['image'] }}" alt="{{ article['title'] }}">
+                    </div>
+                    <div class="content-container">
+                        <h2>{{ article['title'] }}</h2>
+                        <div class="metadata">
+                            <p class="publisher">{{ article['publisher'] }}</p>
+                            <p class="time">{{ article['time'] }}</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </a>
-        {% endfor %} 
-    </div>
+            </a>
+            {% endfor %} 
+        </div>
+    </container>
     <div class="footer-basic">
         <footer>
             <p class="copyright">InvestMates © 2023</p>
