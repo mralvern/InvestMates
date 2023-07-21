@@ -1,36 +1,32 @@
 body {
-background: #fbf8e7;
-font-family: 'Rubik', sans-serif;
+    background: #fff6ed;
+    font-family: 'Rubik', sans-serif;
+    padding-top: 160px;
+}
+
+@media (max-width: 979px) {
+  body {
+    padding-top: 0px;
+  }
 }
 
 h1 {
-text-align: center;
-font-size: 70px;
-margin: 50px;
-}
-
-body {
-background: #fbf8e7;
-font-family: 'Rubik', sans-serif;
+    text-align: center;
+    font-family: 'Staatliches', cursive;
+    font-size: 100px;
+    margin: 50px;
 }
 
 label {
-display: block;
-margin-bottom: 7px;
-padding-left: 35%;
+    display: block;
+    margin-bottom: 7px;
+    padding-left: 35%;
 }
 
-input[type="text"], input[type="password"] {
-display: block;
-width: 30%;
-padding: 10px;
-border-radius: 5px;
-border: 1px solid #ccc;
-margin-bottom: 10px;
-margin-left: 35%;
-}
-
-input[type="number"], input[type="password"] {
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"] {
     display: block;
     width: 30%;
     padding: 10px;
@@ -38,63 +34,39 @@ input[type="number"], input[type="password"] {
     border: 1px solid #ccc;
     margin-bottom: 10px;
     margin-left: 35%;
-    }
-
-input[type="submit"] {
-display: block;
-margin: 0 auto;
-padding: 10px 20px;
-background-color: #4CAF50;
-color: white;
-border: none;
-border-radius: 5px;
-cursor: pointer;
-font-size: 16px;
-font-weight: bold;
-}
-
-input[type="submit"]:hover {
-background-color: #3e8e41;
 }
 
 a {
-display: block;
-text-align: center;
-margin-top: 20px;
+    display: block;
+    text-align: center;
+    margin-top: 20px;
 }
 
 .btn {
-display: block;
-padding: 0.5rem 1rem;
-border-radius: 5rem;
-margin: 8px 400px;
-font-weight: 600;
-text-align: center;
-white-space: nowrap;
-vertical-align: middle;
-cursor: pointer;
-user-select: none;
-border: 1px solid transparent;
-}
-
-.btn-login {
-color: #fff;
-background-color: #007bff;
-border-color: #007bff;
-}
-
-.btn-login:hover {
-background-color: #0069d9;
-border-color: #0062cc;
+    display: block;
+    padding: 0.5rem 1rem;
+    border-radius: 5rem;
+    margin: 8px 400px;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    border: 1px solid transparent;
 }
 
 .btn-register {
-color: #fff;
-background-color: #4e0e50;
-border-color: #4e0e50;
+    border-color: #0d6efd;
+    border-width: 2px;
 }
 
-.btn-register:hover {
-background-color: #611363;
-border-color: #611363;
+.btn-login {
+    border-color: #198754; 
+    border-width: 2px;
+}
+
+.errors {
+    color: red;
+    font-size: 14px;
+    margin-left: 35%;
 }

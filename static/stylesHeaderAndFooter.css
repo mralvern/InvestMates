@@ -1,0 +1,32 @@
+.footer-basic {
+    padding: 40px 0;
+    background-color: #fdecd4;
+    color: #4b4c4d;
+}
+
+.footer-basic .copyright {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 13px;
+    color: #452903;
+    margin-bottom: 0;
+}
+
+.social {
+    font-family: 'Rubik', sans-serif;
+    text-align: center;
+    font-size: 13px;
+}
+
+#navbar {
+    display: flex;
+    justify-content: space-between;
+    background-color: #fdecd4;
+    padding: 0;
+    font-family: 'Staatliches', cursive;
+}
+
+#offcanvasNavbar {
+    background-color: #fdecd4;
+    color: #4b4c4d;
+}
