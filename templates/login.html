@@ -22,6 +22,11 @@
     {{ form.username(id="username") }}
     <label for="password">Password:</label>
     {{ form.password(id="password") }}
+    {% for message in get_flashed_messages(category_filter='error') %}
+      <ul class="errors">
+        <li>{{ message }}</li>
+      </ul>
+    {% endfor %}
     {{ form.submit }}
   </form>
   <a href="{{ url_for('register') }}">Don't have an account? Sign Up</a>

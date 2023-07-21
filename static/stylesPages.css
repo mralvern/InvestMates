@@ -296,3 +296,8 @@ h2 {
 #watchlist-news-container {
     background-color: #E3CAA5;
 }
+
+#importPopupSubmit {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
