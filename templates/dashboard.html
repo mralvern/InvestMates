@@ -175,7 +175,7 @@
             <td>{{ stock[2] }}</td>
             <td>{{ stock[3] }}</td>
             <td>{{ stock[4] }}</td>
-            <td>{{ stock[5] }}</td>
+            <td class="{% if total_gain|float < 0 %}negative{% else %}positive{% endif %}">{{ stock[5] }}</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -221,7 +221,7 @@
   <div class="footer-basic">
     <footer>
       <div class="social">
-        {{ share.create(title='Share with: ') }}
+        {{ share.create(title='Share Image: ') }}
       </div>
       <p class="copyright">InvestMates © 2023</p>
     </footer>
