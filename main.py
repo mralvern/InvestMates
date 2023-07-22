@@ -1,11 +1,11 @@
-from flask import Flask, render_template, url_for, redirect, request, flash, get_flashed_messages
+from flask import Flask, render_template, url_for, redirect, request, flash, get_flashed_messages, send_file
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length, ValidationError, Email
 from flask_bcrypt import Bcrypt
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship 
 import yfinance as yf
 import pandas as pd
 import plotly.graph_objects as go
@@ -16,6 +16,8 @@ import requests
 from bs4 import BeautifulSoup
 from newspaper import Article
 from flask_share import Share
+import csv
+import io
 
 app = Flask(__name__)
 stocks = ["these are my stocks"]
@@ -99,6 +101,14 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Login', render_kw={
                          "class": "btn btn-outline-success btn-login mx-auto my-auto"})
 
+def is_valid_stock(stock_name):
+    ticker = yf.Ticker(stock_name)
+    info = None
+    try:
+        info = ticker.info
+    except:
+        return False
+    return True
 
 def get_stock_price(stock_name):
     ticker = yf.Ticker(stock_name)
@@ -184,16 +194,17 @@ def generate_pnl_chart(user_id):
     return chart_html
 
 
-def get_news_articles(user_id):
-    stocks = db.session.query(Stock.name).filter_by(user_id=user_id).all()
+def get_news_articles(watchlist):
+    stocks = watchlist.stocks.split(',')
+    stocks = [name.strip() for name in stocks if name.strip()]
     article_list = []
     url_set = set()
 
     if not stocks:
-        stocks = [['AAPL'], ['META'], ['TSLA'], ['NVDA']]
+        stocks = ['AAPL', 'META', 'TSLA', 'NVDA']
 
     for stock in stocks:
-        articles = yf.Ticker(stock[0]).get_news()[:3]
+        articles = yf.Ticker(stock).get_news()[:3]
 
         for article in articles:
             url = article['link']
@@ -223,8 +234,7 @@ def get_news_articles(user_id):
                                 'publisher': publisher, 'image': image, 'publishTime': publishTime})
 
     article_list.sort(reverse=True, key=lambda x: x['publishTime'])
-    return article_list[:5]
-
+    return article_list[:7]
 
 def get_sector_pie(user_id):
     stocks = db.session.query(Stock.name).filter_by(user_id=user_id).all()
@@ -273,6 +283,10 @@ def login():
             if bcrypt.check_password_hash(user.password, form.password.data):
                 login_user(user)
                 return redirect(url_for('dashboard'))
+            else:
+                flash('Incorrect Password', 'error')
+        else:
+            flash('Invalid Username', 'error')
     return render_template('login.html', form=form)
 
 
@@ -285,9 +299,38 @@ def dashboard():
         db.func.avg(Stock.purchase_price).label('avg_purchase_price')
     ).filter_by(user_id=current_user.id).group_by(Stock.name).all()
 
-    if request.method == "POST":
+    if request.method == 'POST':
+        if 'csvFile' in request.files:
+            csv_file = request.files['csvFile']
+            if csv_file.filename.endswith('.csv'):
+                try:
+                    csv_data = csv.reader(csv_file.read().decode('utf-8').splitlines())
+                    next(csv_data)
 
+                    for row in csv_data:
+                        stock_name = row[0]
+                        purchase_price = float(row[1])
+                        purchase_date = datetime.strptime(row[2], '%d/%m/%Y').date()
+
+
+                        stock = Stock(name=stock_name, user_id=current_user.id, 
+                                  purchase_price=purchase_price, purchase_date=purchase_date)
+                        db.session.add(stock)
+                    db.session.commit()
+
+                    flash('Stocks imported successfully!', 'success')
+
+                except Exception as e:
+                    flash("Error importing stocks. Please check the CSV file format is of 'Stock Name', 'Purchase Price' and 'Purchase Date'.", 'import_error')
+            
+            else:
+                flash('Invalid file format. Please select a CSV file.', 'danger')
+
+            return redirect(url_for('dashboard'))
+        
         return redirect(url_for('dashboard'))
+    
+    flash_messages = get_flashed_messages(category_filter=['error'])
 
     total_portfolio_value = 0
     total_day_gain = 0
@@ -324,18 +367,7 @@ def dashboard():
     elif chart_type == 'pnl':
         chart_html = generate_pnl_chart(current_user.id)
 
-    news_articles = get_news_articles(current_user.id)
     sector_html = get_sector_pie(current_user.id)
-
-    watchlist = current_user.watchlist.stocks.split(
-        ',') if current_user.watchlist else []
-    watchlist_current_prices = current_user.watchlist.current_prices.split(
-        ',') if current_user.watchlist else []
-    watchlist_day_gains = current_user.watchlist.day_gains.split(
-        ',') if current_user.watchlist else []
-
-    watchlist_data = zip(
-        watchlist, watchlist_current_prices, watchlist_day_gains)
 
     return render_template('dashboard.html',
                            stocks=stocks_with_data,
@@ -345,61 +377,17 @@ def dashboard():
                            total_gain='{:.2f}'.format(total_gain),
                            chart_html=chart_html,
                            chart_type=chart_type,
-                           news_articles=news_articles,
-                           watchlist_data=watchlist_data,
-                           sector_html=sector_html
+                           sector_html=sector_html,
+                           flash_messages=flash_messages
                            )
 
 
 @app.route('/watchlist', methods=['POST', 'GET'])
 def watchlist():
-    stocks = db.session.query(
-        Stock.name,
-        db.func.count().label('total_quantity'),
-        db.func.avg(Stock.purchase_price).label('avg_purchase_price')
-    ).filter_by(user_id=current_user.id).group_by(Stock.name).all()
-
     if request.method == "POST":
+        return redirect(url_for('watchlist'))
 
-        return redirect(url_for('dashboard'))
-
-    total_portfolio_value = 0
-    total_day_gain = 0
-    total_gain = 0
-
-    stocks_with_data = []
-    for stock in stocks:
-        stock_name = stock[0]
-        current_price = get_stock_price(stock_name)
-        total_quantity = stock[1]
-        avg_purchase_price = stock[2]
-        total_value = total_quantity * current_price
-        open_price = get_open_price(stock_name)
-        day_gain = total_quantity * (current_price - open_price)
-        total_day_gain += day_gain
-
-        stock_data = (
-            stock_name,
-            total_quantity,
-            '{:.2f}'.format(avg_purchase_price),
-            '{:.2f}'.format(current_price),
-            '{:.2f}'.format(total_value),
-            '{:.2f}'.format(day_gain)
-        )
-        stocks_with_data.append(stock_data)
-
-        total_portfolio_value += total_value
-        total_gain += total_value - avg_purchase_price * total_quantity
-
-    chart_type = request.args.get('chart_type', 'portfolio')
-
-    if chart_type == 'portfolio':
-        chart_html = generate_portfolio_chart(current_user.id)
-    elif chart_type == 'pnl':
-        chart_html = generate_pnl_chart(current_user.id)
-
-    news_articles = get_news_articles(current_user.id)
-    sector_html = get_sector_pie(current_user.id)
+    news_articles = get_news_articles(current_user.watchlist)
 
     watchlist = current_user.watchlist.stocks.split(
         ',') if current_user.watchlist else []
@@ -412,16 +400,8 @@ def watchlist():
         watchlist, watchlist_current_prices, watchlist_day_gains)
 
     return render_template('watchlist.html',
-                           stocks=stocks_with_data,
-                           total_portfolio_value='{:.2f}'.format(
-                               total_portfolio_value),
-                           total_day_gain='{:.2f}'.format(total_day_gain),
-                           total_gain='{:.2f}'.format(total_gain),
-                           chart_html=chart_html,
-                           chart_type=chart_type,
                            news_articles=news_articles,
                            watchlist_data=watchlist_data,
-                           sector_html=sector_html
                            )
 
 
@@ -463,7 +443,8 @@ def add_to_watchlist():
 def submit():
     if request.method == 'POST':
         stock_name = request.form.get("Stock").upper()
-        if not stock_name:
+        if not is_valid_stock(stock_name):
+            flash('Invalid Stock Name', 'add_error')
             return redirect(url_for('dashboard'))
 
         stock_quantity = int(request.form.get("stockQuantity"))

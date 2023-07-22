@@ -128,7 +128,33 @@
     <div class="header-row text-center">
       <h2 id="top-holdings-heading">Top Holdings</h2>
       <button id="addButton" class="btn btn-outline-secondary">Add</button>
+      <button id="importButton" class="btn btn-outline-secondary">Import</button>
     </div>
+
+    <div id="importPopupForm" class="popup" style="display: none;">
+      <form action="/dashboard" method="POST" enctype="multipart/form-data" class="popup-content">
+        <span id="closeImportButton" class="close">&times;</span>
+        <label for="csvFile" id="importPopupCSV">Select CSV file:</label>
+        <input type="file" id="csvFile" name="csvFile" accept=".csv" required>
+        <button type="submit" id="importPopupSubmit" class="btn btn-outline-secondary">Import</button>
+        {% for message in get_flashed_messages(category_filter='import_error') %}
+          <div class="alert alert-danger" role="alert">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </form>
+    </div>
+      
+    <script>
+      document.getElementById('importButton').addEventListener('click', function() {
+        document.getElementById('importPopupForm').style.display = 'block';
+      });
+    
+      document.getElementById('closeImportButton').addEventListener('click', function() {
+        document.getElementById('importPopupForm').style.display = 'none';
+      });
+    </script>
+
     <div>
       <table class="styled-table">
         <thead>
@@ -163,6 +189,11 @@
       <span id="closeButton" class="close">&times;</span>
       <label for="Stock">Stock:</label>
       <input type="text" id="Stock" name="Stock" required>
+      {% for message in get_flashed_messages(category_filter='add_error') %}
+        <div class="alert alert-danger" role="alert">
+          {{ message }}
+        </div>
+      {% endfor %}
       <label for="stockQuantity">Quantity:</label>
       <input type="number" id="stockQuantity" name="stockQuantity" required>
       <label for="purchasePrice">Purchase Price:</label>
