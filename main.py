@@ -1,11 +1,11 @@
-from flask import Flask, render_template, url_for, redirect, request, flash, get_flashed_messages, send_file
+from flask import Flask, render_template, url_for, redirect, request, flash, get_flashed_messages, send_file, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length, ValidationError, Email
 from flask_bcrypt import Bcrypt
-from sqlalchemy.orm import relationship 
+from sqlalchemy.orm import relationship
 import yfinance as yf
 import pandas as pd
 import plotly.graph_objects as go
@@ -18,6 +18,7 @@ from newspaper import Article
 from flask_share import Share
 import csv
 import io
+import pandas_market_calendars as mcal
 
 app = Flask(__name__)
 stocks = ["these are my stocks"]
@@ -100,6 +101,11 @@ class LoginForm(FlaskForm):
 
     submit = SubmitField('Login', render_kw={
                          "class": "btn btn-outline-success btn-login mx-auto my-auto"})
+    
+def is_market_open():
+    nyse = mcal.get_calendar('NYSE')
+    open = nyse.schedule(start_date=datetime.now(), end_date=datetime.now())
+    return not open.empty
 
 def is_valid_stock(stock_name):
     ticker = yf.Ticker(stock_name)
@@ -344,7 +350,11 @@ def dashboard():
         avg_purchase_price = stock[2]
         total_value = total_quantity * current_price
         open_price = get_open_price(stock_name)
-        day_gain = total_quantity * (current_price - open_price)
+
+        if is_market_open():
+            day_gain = total_quantity * (current_price - open_price)
+        else:
+            day_gain = total_quantity * (current_price - current_price)
         total_day_gain += day_gain
 
         stock_data = (
@@ -399,9 +409,15 @@ def watchlist():
     watchlist_data = zip(
         watchlist, watchlist_current_prices, watchlist_day_gains)
 
+    watchlist_data = []
+    for i in range(0, len(watchlist)):
+        watchlist_data.append([watchlist[i], watchlist_current_prices[i], watchlist_day_gains[i]])
+
+    watchlist_data = watchlist_data[1:]
+    
     return render_template('watchlist.html',
                            news_articles=news_articles,
-                           watchlist_data=watchlist_data,
+                           watchlist_data=watchlist_data
                            )
 
 
@@ -420,7 +436,12 @@ def add_to_watchlist():
                 day_gains = watchlist.day_gains.split(',')
                 current_price = get_stock_price(stock_symbol)
                 open_price = get_open_price(stock_symbol)
-                day_gain = (current_price - open_price)
+
+                if is_market_open():
+                    day_gain = (current_price - open_price)
+                else:
+                    day_gain = (current_price - current_price)
+
                 current_prices.append('{:.2f}'.format(current_price))
                 day_gains.append('{:.2f}'.format(day_gain))
                 watchlist.current_prices = ','.join(current_prices)
@@ -438,6 +459,31 @@ def add_to_watchlist():
 
     return redirect(url_for('watchlist'))
 
+@app.route('/watchlistRemove', methods=['POST'])
+@login_required
+def remove_from_watchlist():
+    if request.method == "POST":
+        stock_symbol = request.form.get('stockToRemove').upper()
+        watchlist = current_user.watchlist
+
+        if watchlist:
+            stocks = watchlist.stocks.split(',')
+            stock_index = stocks.index(stock_symbol)
+            if stock_symbol in stocks:
+                stocks.remove(stock_symbol)
+                watchlist.stocks = ','.join(stocks)
+                current_prices = watchlist.current_prices.split(',')
+                day_gains = watchlist.day_gains.split(',')
+
+                current_prices.pop(stock_index)
+                day_gains.pop(stock_index)
+
+                watchlist.current_prices = ','.join(current_prices)
+                watchlist.day_gains = ','.join(day_gains)
+
+                db.session.commit()
+
+    return redirect(url_for('watchlist'))
 
 @app.route('/submit', methods=['POST'])
 def submit():
