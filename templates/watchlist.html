@@ -70,10 +70,12 @@
             <div class="header-row text-center">
                 <h2 id="watchlist-heading" class="header-row text-center">Watchlist</h2> 
                 <button class="btn btn-outline-secondary" type="submit">Add</button>
+                <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#editModal">Edit</button>
             </div>
             <input type="text" id="stockInput" name="stockInput" placeholder="Enter stock symbol" required>
         </form>
     </div>
+
     <table class="styled-table" id="watchlist-table">
         <thead>
             <tr>
@@ -92,6 +94,44 @@
             {% endfor %}
         </tbody>
     </table>
+
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Edit Watchlist</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Stock Symbol</th>
+                                <th>Remove</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stock, price, gain in watchlist_data %}
+                            <tr>
+                                <td>{{ stock }}</td>
+                                <td>
+                                    <form action="/watchlistRemove" method="POST">
+                                        <input type="hidden" name="stockToRemove" value="{{ stock }}">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">Remove</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <container id="watchlist-news-container">
         <h2>Watchlist News</h2>
         <div class="scrollable-container mx-auto" id="news-container">

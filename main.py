@@ -409,9 +409,15 @@ def watchlist():
     watchlist_data = zip(
         watchlist, watchlist_current_prices, watchlist_day_gains)
 
+    watchlist_data = []
+    for i in range(0, len(watchlist)):
+        watchlist_data.append([watchlist[i], watchlist_current_prices[i], watchlist_day_gains[i]])
+
+    watchlist_data = watchlist_data[1:]
+    
     return render_template('watchlist.html',
                            news_articles=news_articles,
-                           watchlist_data=watchlist_data,
+                           watchlist_data=watchlist_data
                            )
 
 
@@ -453,6 +459,31 @@ def add_to_watchlist():
 
     return redirect(url_for('watchlist'))
 
+@app.route('/watchlistRemove', methods=['POST'])
+@login_required
+def remove_from_watchlist():
+    if request.method == "POST":
+        stock_symbol = request.form.get('stockToRemove').upper()
+        watchlist = current_user.watchlist
+
+        if watchlist:
+            stocks = watchlist.stocks.split(',')
+            stock_index = stocks.index(stock_symbol)
+            if stock_symbol in stocks:
+                stocks.remove(stock_symbol)
+                watchlist.stocks = ','.join(stocks)
+                current_prices = watchlist.current_prices.split(',')
+                day_gains = watchlist.day_gains.split(',')
+
+                current_prices.pop(stock_index)
+                day_gains.pop(stock_index)
+
+                watchlist.current_prices = ','.join(current_prices)
+                watchlist.day_gains = ','.join(day_gains)
+
+                db.session.commit()
+
+    return redirect(url_for('watchlist'))
 
 @app.route('/submit', methods=['POST'])
 def submit():
