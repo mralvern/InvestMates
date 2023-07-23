@@ -19,6 +19,7 @@ from flask_share import Share
 import csv
 import io
 import pandas_market_calendars as mcal
+from sqlalchemy import func
 
 app = Flask(__name__)
 stocks = ["these are my stocks"]
@@ -165,39 +166,47 @@ def generate_portfolio_chart(user_id):
 
 def generate_pnl_chart(user_id):
     stocks = db.session.query(
-        Stock.name, Stock.purchase_date).filter_by(user_id=user_id).all()
+        Stock.name, Stock.purchase_date, Stock.purchase_price).filter_by(user_id=user_id).all()
     data = pd.DataFrame()
 
-    for stock in stocks:
-        ticker = stock[0]
-        start_date = stock[1]
-        chart_data = yf.download(ticker, start=start_date)
-        data = pd.concat([data, chart_data['Close']], axis=1)
+    if stocks:
+        for stock in stocks:
+            ticker = stock[0]
+            start_date = stock[1]
+            chart_data = yf.download(ticker, start=start_date)
+            data = pd.concat([data, chart_data['Close']], axis=1)
+        combined_prices = data.sum(axis=1)
 
-    combined_prices = data.sum(axis=1)
-    purchase_prices = db.session.query(
-        Stock.purchase_price).filter_by(user_id=user_id).all()
-    total_purchase_price = sum([price[0] for price in purchase_prices])
+        earliest_stock = min(stocks, key=lambda stock: stock.purchase_date)
+        earliest_purchase_date = min(stocks, key=lambda stock: stock[1])[1]
+        date_data = yf.download(earliest_stock[0], start=earliest_purchase_date)
+        dates_list = date_data.index.tolist()
 
-    pnl_percentage = (
-        (combined_prices - total_purchase_price) / total_purchase_price) * 100
+        for date in dates_list:
+            prices = 0
+            for stock in stocks:
+                if stock[1] <= date:
+                    prices += stock[2]
 
-    fig = go.Figure(data=go.Scatter(x=data.index, y=pnl_percentage))
+            index = combined_prices.index.get_loc(str(date))
+            combined_prices.iat[index] = (combined_prices.iat[index] - prices) / prices * 100
 
-    fig.update_layout(
-        title='PnL Percentage vs Date',
-        xaxis_title='Date',
-        yaxis_title='PnL Percentage',
-        width=750,
-        height=500,
-        margin=dict(l=20, r=20, t=50, b=10),
-        paper_bgcolor="#fffbe9"
-    )
+        fig = go.Figure(data=go.Scatter(x=dates_list, y=combined_prices))
 
-    fig.update_layout(hovermode="x")
+        fig.update_layout(
+            title='PnL Percentage vs Date',
+            xaxis_title='Date',
+            yaxis_title='PnL Percentage',
+            width=750,
+            height=500,
+            margin=dict(l=20, r=20, t=50, b=10),
+            paper_bgcolor="#fffbe9"
+        )
 
-    chart_html = fig.to_html(full_html=False)
-    return chart_html
+        fig.update_layout(hovermode="x")
+
+        chart_html = fig.to_html(full_html=False)
+        return chart_html
 
 
 def get_news_articles(watchlist):
@@ -393,6 +402,7 @@ def dashboard():
 
 
 @app.route('/watchlist', methods=['POST', 'GET'])
+@login_required
 def watchlist():
     if request.method == "POST":
         return redirect(url_for('watchlist'))
