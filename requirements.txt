@@ -13,3 +13,4 @@ plotly
 matplotlib
 newspaper3k
 flask-share
+pandas_market_calendars
