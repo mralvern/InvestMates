@@ -19,7 +19,6 @@ from flask_share import Share
 import csv
 import io
 import pandas_market_calendars as mcal
-from sqlalchemy import func
 
 app = Flask(__name__)
 stocks = ["these are my stocks"]
