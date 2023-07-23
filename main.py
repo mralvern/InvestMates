@@ -494,7 +494,15 @@ def submit():
             return redirect(url_for('dashboard'))
 
         stock_quantity = int(request.form.get("stockQuantity"))
+        if stock_quantity < 1:
+            flash('Invalid Stock Quantity', 'add_error')
+            return redirect(url_for('dashboard'))
+        
         purchase_price = request.form.get("purchasePrice")
+        if float(purchase_price) < 0.01:
+            flash('Invalid Purchase Price', 'add_error')
+            return redirect(url_for('dashboard'))
+
         purchase_date = datetime.strptime(
             request.form.get("purchaseDate"), '%Y-%m-%d').date()
 
@@ -506,6 +514,20 @@ def submit():
 
     return redirect(url_for('dashboard'))
 
+@app.route('/remove_stock', methods=['POST'])
+@login_required
+def remove_stock():
+    data = request.get_json()
+    stock_name = data.get('stock_name')
+    user_id = current_user.id
+
+    stocks_to_remove = Stock.query.filter_by(
+        name=stock_name, user_id=user_id).all()
+    for stock in stocks_to_remove:
+        db.session.delete(stock)
+    db.session.commit()
+
+    return jsonify(success=True)
 
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required

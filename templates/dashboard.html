@@ -129,7 +129,60 @@
       <h2 id="top-holdings-heading">Top Holdings</h2>
       <button id="addButton" class="btn btn-outline-secondary">Add</button>
       <button id="importButton" class="btn btn-outline-secondary">Import</button>
+      <button id="editButton" class="btn btn-outline-secondary">Edit</button>
     </div>
+
+    <div id="editStockModal" class="modal">
+      <div class="modal-content">
+        <span class="close" id="closeEditModal">&times;</span>
+        <h2 id="modalEditText">Edit Portfolio</h2>
+        <table class="styled-table" id="edit-portfolio-table">
+          <thead>
+            <tr>
+              <th>Stock Name</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for stock in stocks %}
+            <tr>
+              <td>{{ stock[0] }}</td>
+              <td><button class="btn btn-outline-danger" onclick="removeStock('{{ stock[0] }}')">Remove</button></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <script>
+      document.getElementById('editButton').addEventListener('click', function () {
+        document.getElementById('editStockModal').style.display = 'block';
+      });
+    
+      document.getElementById('closeEditModal').addEventListener('click', function () {
+        document.getElementById('editStockModal').style.display = 'none';
+      });
+    
+      function removeStock(stockName) {
+        fetch('/remove_stock', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            stock_name: stockName,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              location.reload(); // Refresh the page to update the stock table
+            }
+          })
+          .catch((error) => console.error('Error:', error));
+      }
+    </script>
 
     <div id="importPopupForm" class="popup" style="display: none;">
       <form action="/dashboard" method="POST" enctype="multipart/form-data" class="popup-content">
@@ -189,17 +242,17 @@
       <span id="closeButton" class="close">&times;</span>
       <label for="Stock">Stock:</label>
       <input type="text" id="Stock" name="Stock" required>
-      {% for message in get_flashed_messages(category_filter='add_error') %}
-        <div class="alert alert-danger" role="alert">
-          {{ message }}
-        </div>
-      {% endfor %}
       <label for="stockQuantity">Quantity:</label>
       <input type="number" id="stockQuantity" name="stockQuantity" required>
       <label for="purchasePrice">Purchase Price:</label>
       <input type="number" id="purchasePrice" name="purchasePrice" required>
       <label for="purchaseDate">Purchase Date:</label>
       <input type="date" id="purchaseDate" name="purchaseDate" required class="center-input">
+      {% for message in get_flashed_messages(category_filter='add_error') %}
+        <div class="alert alert-danger" id="addError" role="alert">
+          {{ message }}
+        </div>
+      {% endfor %}
       <button type="submit">+Add</button>
     </form>
     <form action="/screenshot" method="POST">
