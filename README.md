@@ -42,30 +42,30 @@ User stories:
 
 Completed core features:
  1. User account authentication
-InvestMate is a personalised portfolio application, hence each user would need to be authenticated with his/her unique account.
-
-InvestMate requires the user to register with their email, as well as a unique username and valid password. Users would only be able to access the web page if they have a valid account.
-
-Upon successful registration, the user will be redirected to the login page where they can login using the username and password they have chosen.
-
-![image](https://github.com/mralvern/InvestMates/assets/100460765/9e0e27b5-187c-467b-8534-2366596a7bb5)
+   InvestMate is a personalised portfolio application, hence each user would need to be authenticated with his/her unique account.
+   
+   InvestMate requires the user to register with their email, as well as a unique username and valid password. Users would only be able to access the web page if they have a valid account.
+   
+   Upon successful registration, the user will be redirected to the login page where they can login using the username and password they have chosen.
+   
+   ![image](https://github.com/mralvern/InvestMates/assets/100460765/9e0e27b5-187c-467b-8534-2366596a7bb5)
 
 
  2. Stock tracking
-The stocks that the user owns would be displayed in a table form on the dashboard page. InvestMates uses Yahoo Finance! API in order to get the current prices of any stock on the US market. The current prices are displayed and updated in real time. 
-
-InvestMates also automatically calculates the day gain/loss of stocks the user owns. Using Yahoo Finance! API, we fetch the current price as well as the open price of the stock. The difference in these prices will give us the day gain of the stock. The day gain/loss is calculated for each stock using the formula: day gain * stock quantity.
-The total day gain/loss is calculated by summing the day gain/loss for each stock the user owns.
+   The stocks that the user owns would be displayed in a table form on the dashboard page. InvestMates uses Yahoo Finance! API in order to get the current prices of any stock on the US market. The current prices are displayed and updated in real time. 
+   
+   InvestMates also automatically calculates the day gain/loss of stocks the user owns. Using Yahoo Finance! API, we fetch the current price as well as the open price of the stock. The difference in these prices will give us the day gain of the stock. The day gain/loss is calculated for each stock using the formula: day gain * stock quantity.
+   The total day gain/loss is calculated by summing the day gain/loss for each stock the user owns.
 
 
  3. Portfolio creation
-Portfolio Creation 
-Upon logging in to InvestMates, the user will now be able to add stocks to their portfolio. 
-The required fields for the submission form are the stock’s ‘Stock Name’, ‘Quantity’, ‘Purchase Price’ and ‘Purchase Date’. 
-
-Users are also able to use the import csv file function to import stock data they have exported from their different brokers. The formatting for the csv file would be ‘Stock Name’, ‘Purchase Price’ and ‘Purchase Date’. Users have to follow this exact format in order for the import function to work.
-
-We use sqlalchemy to track each user’s data and the stocks they hold. Upon adding all the stocks the user owns, their portfolio will display the overall performance and value, providing overview of the user’s investments.
+   Portfolio Creation 
+   Upon logging in to InvestMates, the user will now be able to add stocks to their portfolio. 
+   The required fields for the submission form are the stock’s ‘Stock Name’, ‘Quantity’, ‘Purchase Price’ and ‘Purchase Date’. 
+   
+   Users are also able to use the import csv file function to import stock data they have exported from their different brokers. The formatting for the csv file would be ‘Stock Name’, ‘Purchase Price’ and ‘Purchase Date’. Users have to follow this exact format in order for the import function to work.
+   
+   We use sqlalchemy to track each user’s data and the stocks they hold. Upon adding all the stocks the user owns, their portfolio will display the overall performance and value, providing overview of the user’s investments.
 
 
  4. Automatic calculation of total assets
