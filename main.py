@@ -393,6 +393,7 @@ def dashboard():
 
 
 @app.route('/watchlist', methods=['POST', 'GET'])
+@login_required
 def watchlist():
     if request.method == "POST":
         return redirect(url_for('watchlist'))
